@@ -1,9 +1,10 @@
-import StudentDashboard from './Student/StudentDashboard/StudentDashboard.jsx'
+import ReservationStart from './Student/ReservationStart/ReservationStart'
+import './Main.css'
 
-function Main() {
+const Main = () => {
   return (
-    <main>
-      <StudentDashboard />
+    <main className="main">
+      <ReservationStart />
     </main>
   )
 }

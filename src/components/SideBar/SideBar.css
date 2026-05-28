@@ -1,0 +1,36 @@
+.sidebar {
+  width: 194px;
+  background-color: #ff671f;
+  min-height: calc(100vh - 70px);
+  padding-top: 28px;
+  box-sizing: border-box;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.sidebar-option {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  border: none;
+  background: transparent;
+  padding: 0 12px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+  color: #000;
+}
+
+.sidebar-option img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+.sidebar-option span {
+  white-space: nowrap;
+}

@@ -1,13 +1,18 @@
-import './App.css'
-import Main from './components/Main/Main'
 import Header from './components/Header/Header'
+import SideBar from './components/SideBar/SideBar'
+import Main from './components/Main/Main'
+import './App.css'
 
-function App() {
+const App = () => {
   return (
-    <>
+    <div className="app">
       <Header />
-      <Main />
-    </>
+
+      <div className="app-body">
+        <SideBar />
+        <Main />
+      </div>
+    </div>
   )
 }
 
