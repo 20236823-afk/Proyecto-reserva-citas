@@ -52,6 +52,7 @@ const reservasIniciales = [
 const Main = ({ currentSection, setCurrentSection }) => {
   const [paso, setPaso] = useState(1)
   const [reservas, setReservas] = useState(reservasIniciales)
+  const [servicioSeleccionado, setServicioSeleccionado] = useState(null)
 
   useEffect(() => {
     if (currentSection === 'nueva-reserva') {
@@ -59,12 +60,17 @@ const Main = ({ currentSection, setCurrentSection }) => {
     }
   }, [currentSection])
 
+  const seleccionarServicio = (servicio) => {
+    setServicioSeleccionado(servicio)
+    setPaso(2)
+  }
+
   const agregarReserva = () => {
     const nuevaReserva = {
       id: `0000${Math.floor(Math.random() * 900000 + 100000)}`,
       local: 'Centro Deportivo Mayorazgo',
-      recurso: 'Basket media cancha',
-      detalle: 'Media cancha',
+      recurso: servicioSeleccionado ? servicioSeleccionado.nombre : 'Servicio no seleccionado',
+      detalle: servicioSeleccionado ? servicioSeleccionado.nombre : 'Sin detalle',
       fecha: '04/06/2026',
       horario: '10:00 - 10:50',
       estado: 'Confirmado'
@@ -96,7 +102,7 @@ const Main = ({ currentSection, setCurrentSection }) => {
         <>
           {paso === 1 && (
             <ReservationStart
-              siguientePaso={() => setPaso(2)}
+              seleccionarServicio={seleccionarServicio}
             />
           )}
 
@@ -125,6 +131,7 @@ const Main = ({ currentSection, setCurrentSection }) => {
             <ReservationSummary
               volverPaso={() => setPaso(4)}
               confirmarReserva={agregarReserva}
+              servicioSeleccionado={servicioSeleccionado}
             />
           )}
         </>

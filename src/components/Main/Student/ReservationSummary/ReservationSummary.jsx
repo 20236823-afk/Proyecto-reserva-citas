@@ -1,7 +1,7 @@
 import ReservationSteps from '../reservationSteps/reservationSteps'
 import './ReservationSummary.css'
 
-const ReservationSummary = ({ volverPaso, confirmarReserva }) => {
+const ReservationSummary = ({ volverPaso, confirmarReserva, servicioSeleccionado }) => {
   return (
     <section className="summary-page">
       <ReservationSteps pasoActual={3} />
@@ -28,7 +28,9 @@ const ReservationSummary = ({ volverPaso, confirmarReserva }) => {
 
           <div className="summary-row">
             <span>Recurso:</span>
-            <strong>Basket media cancha</strong>
+            <strong>
+              {servicioSeleccionado ? servicioSeleccionado.nombre : 'Servicio no seleccionado'}
+            </strong>
           </div>
 
           <div className="summary-row">

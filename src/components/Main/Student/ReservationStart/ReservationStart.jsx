@@ -6,7 +6,7 @@ import reservaCubiculos from '../../../../assets/reserva_cubiculos.webp'
 
 import './ReservationStart.css'
 
-const ReservationStart = ({ siguientePaso }) => {
+const ReservationStart = ({ seleccionarServicio }) => {
   const servicios = [
     {
       id: 1,
@@ -42,9 +42,8 @@ const ReservationStart = ({ siguientePaso }) => {
 
   const reservarServicio = (servicio) => {
     console.log('Servicio seleccionado:', servicio.nombre)
-
-    if (siguientePaso) {
-      siguientePaso()
+    if (seleccionarServicio) {
+      seleccionarServicio(servicio)
     }
   }
 
