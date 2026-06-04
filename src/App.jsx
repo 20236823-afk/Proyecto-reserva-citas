@@ -17,7 +17,10 @@ const App = () => {
           setCurrentSection={setCurrentSection}
         />
 
-        <Main currentSection={currentSection} />
+        <Main
+          currentSection={currentSection}
+          setCurrentSection={setCurrentSection}
+        />
       </div>
     </div>
   )

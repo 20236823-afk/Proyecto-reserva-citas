@@ -1,68 +1,13 @@
 import { useState } from 'react'
 import './MyReservation.css'
 
-const reservasIniciales = [
-  {
-    id: '0000309481',
-    local: 'Centro Deportivo Mayorazgo',
-    recurso: 'Basket cancha completa',
-    detalle: 'Cancha completa',
-    fecha: '03/06/2026',
-    horario: '07:00 - 07:50',
-    estado: 'Cancelado'
-  },
-  {
-    id: '0000305573',
-    local: 'Centro Deportivo Mayorazgo',
-    recurso: 'Basket media cancha',
-    detalle: 'Media cancha',
-    fecha: '29/05/2026',
-    horario: '10:00 - 10:50',
-    estado: 'Cancelado'
-  },
-  {
-    id: '0000305293',
-    local: 'Centro Deportivo Mayorazgo',
-    recurso: 'Piscina',
-    detalle: 'Carril de natación',
-    fecha: '28/05/2026',
-    horario: '15:00 - 15:50',
-    estado: 'Confirmado'
-  },
-  {
-    id: '0000306210',
-    local: 'Biblioteca Central',
-    recurso: 'Cubículo de estudio',
-    detalle: 'Cubículo grupal',
-    fecha: '05/06/2026',
-    horario: '12:00 - 13:00',
-    estado: 'Pendiente'
-  }
-]
-
-const MyReservations = () => {
-  const [reservas, setReservas] = useState(reservasIniciales)
+const MyReservation = ({ reservas, cancelarReserva }) => {
   const [filtroEstado, setFiltroEstado] = useState('Todas')
 
   const reservasFiltradas =
     filtroEstado === 'Todas'
       ? reservas
       : reservas.filter((reserva) => reserva.estado === filtroEstado)
-
-  const cancelarReserva = (id) => {
-    const nuevasReservas = reservas.map((reserva) => {
-      if (reserva.id === id) {
-        return {
-          ...reserva,
-          estado: 'Cancelado'
-        }
-      }
-
-      return reserva
-    })
-
-    setReservas(nuevasReservas)
-  }
 
   return (
     <section className="my-reservations">
@@ -153,6 +98,14 @@ const MyReservations = () => {
                 </td>
               </tr>
             ))}
+
+            {reservasFiltradas.length === 0 && (
+              <tr>
+                <td colSpan="8" className="empty-reservations">
+                  No hay reservas para mostrar.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
@@ -160,4 +113,4 @@ const MyReservations = () => {
   )
 }
 
-export default MyReservations
+export default MyReservation

@@ -1,7 +1,7 @@
 import ReservationSteps from '../reservationSteps/reservationSteps'
 import './ReservationSummary.css'
 
-const ReservationSummary = ({ volverPaso }) => {
+const ReservationSummary = ({ volverPaso, confirmarReserva }) => {
   return (
     <section className="summary-page">
       <ReservationSteps pasoActual={3} />
@@ -58,6 +58,7 @@ const ReservationSummary = ({ volverPaso }) => {
           <button
             type="button"
             className="summary-confirm-button"
+            onClick={confirmarReserva}
           >
             Confirmar reserva
           </button>
