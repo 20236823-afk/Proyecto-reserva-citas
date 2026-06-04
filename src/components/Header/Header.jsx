@@ -3,22 +3,13 @@ import logo from '../../assets/logo.svg'
 import perfilIcono from '../../assets/perfil_icono.png'
 import './Header.css'
 
-const Header = () => {
+const Header = ({ usuario, cerrarSesion }) => {
   const [mostrarPerfil, setMostrarPerfil] = useState(false)
   const perfilRef = useRef(null)
 
-  const estudiante = {
-    nombre: 'Antonio Sifuentes',
-    codigo: '20236823',
-    correo: '20236823@aloe.ulima.edu.pe'
-  }
 
   const cambiarVisibilidadPerfil = () => {
     setMostrarPerfil(!mostrarPerfil)
-  }
-
-  const cerrarSesion = () => {
-    alert('Sesión cerrada')
   }
 
   useEffect(() => {
@@ -56,20 +47,17 @@ const Header = () => {
 
         {mostrarPerfil && (
           <div className="profile-dropdown">
-            <h3>{estudiante.nombre}</h3>
-
+            <h3>{usuario.nombre}</h3>
             <div className="profile-info">
               <p>
                 <span>Código:</span>
-                {estudiante.codigo}
+                {usuario.codigo}
               </p>
-
               <p>
                 <span>Correo:</span>
-                {estudiante.correo}
+                {usuario.correo}
               </p>
             </div>
-
             <button
               className="logout-button"
               onClick={cerrarSesion}
@@ -78,6 +66,7 @@ const Header = () => {
             </button>
           </div>
         )}
+        
       </div>
     </header>
   )

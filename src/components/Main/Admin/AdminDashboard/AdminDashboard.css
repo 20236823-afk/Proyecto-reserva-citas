@@ -1,0 +1,56 @@
+.admin-dashboard {
+  padding: 24px;
+}
+
+.admin-dashboard-header {
+  margin-bottom: 24px;
+}
+
+.admin-dashboard-header h2 {
+  margin: 0 0 6px;
+  color: #2d2d2d;
+  font-size: 24px;
+}
+
+.admin-dashboard-header p {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+}
+
+/* Cuadrícula de tarjetas: se adapta al ancho disponible */
+.admin-dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.admin-card {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-left: 4px solid #ff671f;
+  border-radius: 4px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-card-valor {
+  font-size: 32px;
+  font-weight: 700;
+  color: #2d2d2d;
+}
+
+.admin-card-etiqueta {
+  font-size: 14px;
+  color: #666;
+}
+
+/* Color del borde izquierdo según el tipo de indicador */
+.admin-card-total { border-left-color: #ff671f; }
+.admin-card-confirmada { border-left-color: #2e7d32; }
+.admin-card-pendiente { border-left-color: #b8860b; }
+.admin-card-cancelada { border-left-color: #c0392b; }
+.admin-card-servicio { border-left-color: #555555; }
+.admin-card-noticia { border-left-color: #1565c0; }
