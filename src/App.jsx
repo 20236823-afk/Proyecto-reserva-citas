@@ -8,6 +8,7 @@ import AdminDashboard from './components/Main/Admin/AdminDashboard/AdminDashboar
 import ManageReservations from './components/Main/Admin/ManageReservations/ManageReservations'
 import ManageServices from './components/Main/Admin/ManageServices/ManageServices'
 import ManageNews from './components/Main/Admin/ManageNews/ManageNews'
+import ManageSchedules from './components/Main/Admin/ManageSchedules/ManageSchedules'
 import './App.css'
 
 const App = () => {
@@ -49,6 +50,7 @@ const App = () => {
               {currentSection === 'admin-reservas' && <ManageReservations />}
               {currentSection === 'admin-servicios' && <ManageServices />}
               {currentSection === 'admin-noticias' && <ManageNews />}
+              {currentSection === 'admin-horarios' && <ManageSchedules />}
               {/* mas secciones */}
             </main>
           </>
