@@ -1,0 +1,72 @@
+
+.dashboard-wrapper {
+    padding: 24px;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    background-color: #f8fafc;
+    min-height: 100vh;
+}
+
+.dashboard-wrapper h2 {
+    color: #1e293b;
+    margin-bottom: 24px;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+
+.metrics-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+
+.metric-card {
+    border: 1px solid #e2e8f0;
+    padding: 20px;
+    border-radius: 10px;
+    flex: 1;
+    background-color: #ffffff;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-2px);
+}
+
+.metric-card h4 {
+    margin: 0 0 8px 0;
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+
+.metric-number {
+    font-size: 32px;
+    font-weight: 700;
+    margin: 0;
+}
+
+
+.metric-number.total { 
+    color: #E06000; 
+}
+
+.metric-number.accepted { 
+    color: #16a34a; 
+}
+
+.metric-number.pending { 
+    color: #ea580c;
+}
+
+
+@media (max-width: 768px) {
+    .metrics-row {
+        flex-direction: column;
+    }
+}

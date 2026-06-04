@@ -1,0 +1,230 @@
+/* Contenedor principal de la tabla */
+.reservations-container {
+    background-color: #ffffff;
+    padding: 24px;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    margin-top: 10px;
+}
+
+.reservations-container h3 {
+    margin-top: 30px; 
+    margin-bottom: 20px;
+    color: #1e293b;
+    font-size: 20px; 
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+
+.filter-container {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 8px;
+}
+
+.filter-btn {
+    padding: 8px 16px;
+    cursor: pointer;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-weight: 500;
+    background-color: #ffffff;
+    color: #64748b;
+    transition: all 0.2s ease;
+}
+
+.filter-btn:hover {
+    background-color: #f1f5f9;
+}
+
+/* El botón activo tendrá el color naranja corporativo */
+.filter-btn.active {
+    background-color: #E06000;
+    color: #ffffff;
+    border-color: #E06000;
+}
+
+/* Estilos de la Tabla */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.data-table th {
+    background-color: #f8fafc;
+    color: #475569;
+    border-bottom: 2px solid #e2e8f0;
+    padding: 12px 16px;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.data-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid #e2e8f0;
+    color: #334155;
+    font-size: 14px;
+}
+
+/* Etiquetas de Estado (Badges) */
+.status-badge {
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    text-transform: uppercase;
+}
+.status-badge.pendiente { 
+    background-color: #ffedd5;
+    color: #ea580c; 
+}
+.status-badge.aceptada { 
+    background-color: #dcfce7;
+    color: #16a34a; 
+}
+.status-badge.cancelada { 
+    background-color: #fee2e2;
+    color: #dc2626; 
+}
+
+/* Botones de Acción del Administrador */
+.btn-action-accept { 
+    background-color: #16a34a; 
+    color: white; 
+    border: none; 
+    margin-right: 6px; 
+    cursor: pointer; 
+    padding: 6px 12px; 
+    border-radius: 6px;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+.btn-action-accept:hover {
+    background-color: #15803d;
+}
+
+.btn-action-cancel { 
+    background-color: #dc2626; 
+    color: white; 
+    border: none; 
+    margin-right: 6px;
+    cursor: pointer; 
+    padding: 6px 12px; 
+    border-radius: 6px;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+.btn-action-cancel:hover {
+    background-color: #b91c1c;
+}
+
+/* Botón Eliminar (Estilo sobrio gris oscuro, igual que el del profe) */
+.btn-action-delete {
+    background-color: #475569;
+    color: white;
+    border: none;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: background 0.2s;
+}
+.btn-action-delete:hover {
+    background-color: #334155;
+}
+
+/* Texto cuando la reserva ya fue atendida */
+.status-finished { 
+    color: #94a3b8; 
+    font-size: 13px;
+    font-style: italic;
+    margin-right: 10px;
+}
+/* Estilos para el nuevo buscador */
+.search-input {
+    padding: 8px 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 14px;
+    width: 260px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.search-input:focus {
+    border-color: #E06000; /* Borde naranja cuando haces clic para escribir */
+    box-shadow: 0 0 0 2px rgba(224, 96, 0, 0.1);
+}
+/* Notificación flotante de Deshacer */
+.undo-toast {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    background-color: #1e293b; /* Gris oscuro elegante */
+    color: #ffffff;
+    padding: 12px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 14px;
+    z-index: 9999;
+    animation: slideIn 0.3s ease-out;
+}
+
+.undo-btn {
+    background-color: #E06000; /* Naranja de tu paleta */
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s;
+}
+
+.undo-btn:hover {
+    background-color: #ff7308;
+}
+
+@keyframes slideIn {
+    from { transform: translateY(100px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+/* --- NUEVOS ESTILOS PARA LAS TARJETAS --- */
+
+.stats-container {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.stat-card {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    flex: 1;
+    text-align: center;
+}
+
+.stat-card h4 {
+    margin: 0 0 10px 0;
+    color: #64748b;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-number {
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0;
+    color: #1e293b;
+}
