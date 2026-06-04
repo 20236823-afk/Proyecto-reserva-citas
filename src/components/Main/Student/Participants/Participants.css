@@ -1,0 +1,92 @@
+.participants-page{
+    width: 100%;
+    min-height: calc(100vh - 70px);
+    background-color: #f5f6f8;
+    padding: 30px 40px;
+    box-sizing: border-box;
+}
+
+.participants-card{
+    background-color: white;
+    max-width: 850px;
+    margin: 30px auto;
+    padding: 35px 45px;
+    border-radius: 16px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+}
+
+.participants-card h2{
+    color: #ff5a1f;
+    margin-bottom: 25px;
+}
+
+.participants-table{
+    width: 100%;
+    border: 1px solid #d0d0d0;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.table-header,
+.table-row{
+    display: grid;
+    grid-template-columns: 1fr 2fr 120px;
+    align-items: center;
+}
+
+.table-header{
+    background-color: #eeeeee;
+    font-weight: bold;
+    padding: 14px;
+}
+
+.table-row{
+    padding: 14px;
+    border-top: 1px solid #d0d0d0;
+}
+
+.table-actions{
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.table-actions button{
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 8px;
+    background-color: #eeeeee;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.participants-buttons{
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    margin-top: 35px;
+}
+
+.participants-back-button,
+.participants-next-button{
+    width: 160px;
+    height: 48px;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.participants-back-button{
+    background-color: #eeeeee;
+    color: #222;
+}
+
+.participants-next-button{
+    background-color: #ff5a1f;
+    color: white;
+    box-shadow: 0 4px 10px rgba(255,90,31,0.3);
+}

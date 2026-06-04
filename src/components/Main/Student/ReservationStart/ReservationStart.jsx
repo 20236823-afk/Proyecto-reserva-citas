@@ -6,7 +6,7 @@ import reservaCubiculos from '../../../../assets/reserva_cubiculos.webp'
 
 import './ReservationStart.css'
 
-const ReservationStart = () => {
+const ReservationStart = ({ siguientePaso }) => {
   const servicios = [
     {
       id: 1,
@@ -40,9 +40,16 @@ const ReservationStart = () => {
     }
   ]
 
+  const reservarServicio = (servicio) => {
+    console.log('Servicio seleccionado:', servicio.nombre)
+
+    if (siguientePaso) {
+      siguientePaso()
+    }
+  }
+
   return (
     <section className="reservation-start">
-
       <div className="services-grid">
         {servicios.map((servicio) => (
           <article className="service-card" key={servicio.id}>
@@ -61,7 +68,10 @@ const ReservationStart = () => {
                   Más información
                 </button>
 
-                <button className="reserve-button">
+                <button
+                  className="reserve-button"
+                  onClick={() => reservarServicio(servicio)}
+                >
                   Reservar
                 </button>
               </div>
