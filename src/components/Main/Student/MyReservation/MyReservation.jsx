@@ -3,24 +3,96 @@ import './MyReservation.css'
 
 const MyReservation = ({ reservas, cancelarReserva }) => {
   const [filtroEstado, setFiltroEstado] = useState('Todas')
+  const [reservaSeleccionada, setReservaSeleccionada] = useState(null)
 
   const reservasFiltradas =
     filtroEstado === 'Todas'
       ? reservas
       : reservas.filter((reserva) => reserva.estado === filtroEstado)
 
+  const verDetalleReserva = (reserva) => {
+    setReservaSeleccionada(reserva)
+  }
+
+  const cerrarDetalleReserva = () => {
+    setReservaSeleccionada(null)
+  }
+
   return (
     <section className="my-reservations">
-      <div className="reservations-header">
-        <div>
-          <h2>Mis reservas</h2>
-          <p>Consulta el estado de tus reservas realizadas.</p>
-        </div>
 
-        <span className="reservations-count">
-          {reservasFiltradas.length} reservas
-        </span>
-      </div>
+      {reservaSeleccionada && (
+        <div className="reservation-modal-overlay">
+          <div className="reservation-modal">
+            <div className="reservation-modal-header">
+              <div>
+                <h2>Detalle de reserva</h2>
+                <p>Revise la información registrada para esta reserva.</p>
+              </div>
+
+              <button
+                className="modal-close-button"
+                onClick={cerrarDetalleReserva}
+              >
+                Cerrar
+              </button>
+            </div>
+
+            <div className="modal-section">
+              <h3>Datos generales</h3>
+
+              <div className="modal-row">
+                <span>ID Reserva:</span>
+                <strong>{reservaSeleccionada.id}</strong>
+              </div>
+
+              <div className="modal-row">
+                <span>Campus:</span>
+                <strong>{reservaSeleccionada.campus || 'Mayorazgo'}</strong>
+              </div>
+
+              <div className="modal-row">
+                <span>Ubicación:</span>
+                <strong>{reservaSeleccionada.local}</strong>
+              </div>
+
+              <div className="modal-row">
+                <span>Recurso:</span>
+                <strong>{reservaSeleccionada.recurso}</strong>
+              </div>
+
+              <div className="modal-row">
+                <span>Detalle:</span>
+                <strong>{reservaSeleccionada.detalle}</strong>
+              </div>
+
+              <div className="modal-row">
+                <span>Fecha:</span>
+                <strong>{reservaSeleccionada.fecha}</strong>
+              </div>
+
+              <div className="modal-row">
+                <span>Horario:</span>
+                <strong>{reservaSeleccionada.horario}</strong>
+              </div>
+
+              <div className="modal-row">
+                <span>Estado:</span>
+                <strong>{reservaSeleccionada.estado}</strong>
+              </div>
+            </div>
+
+            <div className="modal-section">
+              <h3>Participantes</h3>
+
+              <div className="participant-summary-modal">
+                <span>{reservaSeleccionada.codigoEstudiante || '20236823'}</span>
+                <strong>{reservaSeleccionada.nombreEstudiante || 'Antonio Sifuentes Linares'}</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="reservations-filters">
         <button
@@ -83,7 +155,10 @@ const MyReservation = ({ reservas, cancelarReserva }) => {
                 </td>
                 <td>
                   <div className="reservation-actions">
-                    <button className="detail-button">
+                    <button
+                      className="detail-button"
+                      onClick={() => verDetalleReserva(reserva)}
+                    >
                       Ver detalle
                     </button>
 

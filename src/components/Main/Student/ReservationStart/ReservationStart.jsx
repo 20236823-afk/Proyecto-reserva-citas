@@ -41,12 +41,16 @@ const ReservationStart = ({ seleccionarServicio }) => {
   ]
 
   const reservarServicio = (servicio) => {
-    console.log('Servicio seleccionado:', servicio.nombre)
+  console.log('Servicio seleccionado:', servicio.nombre)
+
     if (seleccionarServicio) {
       seleccionarServicio(servicio)
     }
   }
 
+  const abrirMasInformacion = () => {
+    window.open('https://webaloe.ulima.edu.pe/portalUL/inicio.jsp', '_blank')
+  }
   return (
     <section className="reservation-start">
       <div className="services-grid">
@@ -63,7 +67,10 @@ const ReservationStart = ({ seleccionarServicio }) => {
               <p>{servicio.descripcion}</p>
 
               <div className="service-actions">
-                <button className="info-button">
+                <button
+                  className="info-button"
+                  onClick={abrirMasInformacion}
+                >
                   Más información
                 </button>
 
