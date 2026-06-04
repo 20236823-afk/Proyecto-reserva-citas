@@ -5,6 +5,7 @@ import SideBar from './components/SideBar/SideBar'
 import AdminSideBar from './components/SideBar/AdminSideBar'
 import Main from './components/Main/Main'
 import AdminDashboard from './components/Main/Admin/AdminDashboard/AdminDashboard'
+import ManageReservations from './components/Main/Admin/ManageReservations/ManageReservations'
 import './App.css'
 
 const App = () => {
@@ -43,7 +44,8 @@ const App = () => {
             />
             <main className="main">
               {currentSection === 'admin-dashboard' && <AdminDashboard />}
-              {/* otras secciones de admin */}
+              {currentSection === 'admin-reservas' && <ManageReservations />}
+              {/* massss */}
             </main>
           </>
         ) : (

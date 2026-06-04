@@ -1,6 +1,6 @@
 import './AdminDashboard.css'
 
-// Datos simulados del panel. luego estos números maybe
+// Datos simulados del panel. luego estos nums maybe
 // calcularse a partir de las reservas reales del sistema
 const indicadores = [
   { id: 1, etiqueta: 'Total de reservas', valor: 128, tipo: 'total' },
