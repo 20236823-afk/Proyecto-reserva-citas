@@ -1,0 +1,170 @@
+.my-reservations {
+  width: 100%;
+  min-height: calc(100vh - 70px);
+  background-color: #f5f5f5;
+  padding: 38px 56px;
+  box-sizing: border-box;
+}
+
+.reservations-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.reservations-header h2 {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 700;
+  color: #111;
+}
+
+.reservations-header p {
+  margin: 8px 0 0;
+  font-size: 15px;
+  color: #555;
+}
+
+.reservations-count {
+  background-color: #ffffff;
+  color: #111;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 10px 16px;
+  border-radius: 999px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.reservations-filters {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.filter-button {
+  border: 1px solid #d6d6d6;
+  background-color: #ffffff;
+  color: #111;
+  padding: 9px 16px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.filter-button:hover {
+  background-color: #eeeeee;
+  transform: translateY(-1px);
+}
+
+.filter-button.active {
+  background-color: #ff671f;
+  color: #ffffff;
+  border-color: #ff671f;
+}
+
+.reservations-table-container {
+  width: 100%;
+  background-color: #ffffff;
+  border-radius: 14px;
+  overflow-x: auto;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.10);
+}
+
+.reservations-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 980px;
+}
+
+.reservations-table thead {
+  background-color: #f2f2f2;
+  border-bottom: 3px solid #ff671f;
+}
+
+.reservations-table th {
+  padding: 16px 14px;
+  text-align: left;
+  font-size: 14px;
+  color: #111;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.reservations-table td {
+  padding: 16px 14px;
+  font-size: 14px;
+  color: #333;
+  border-bottom: 1px solid #eeeeee;
+  vertical-align: middle;
+}
+
+.reservations-table tbody tr:hover {
+  background-color: #fafafa;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.status-badge.confirmado {
+  background-color: #e6f4ea;
+  color: #1e7e34;
+}
+
+.status-badge.pendiente {
+  background-color: #fff4df;
+  color: #b35a00;
+}
+
+.status-badge.cancelado {
+  background-color: #fdeaea;
+  color: #b42318;
+}
+
+.reservation-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.detail-button,
+.cancel-button {
+  border: none;
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.detail-button {
+  background-color: #ffffff;
+  color: #111;
+  border: 1px solid #d0d0d0;
+}
+
+.detail-button:hover {
+  background-color: #eeeeee;
+}
+
+.cancel-button {
+  background-color: #ff671f;
+  color: #ffffff;
+}
+
+.cancel-button:hover {
+  background-color: #e85d1c;
+}
+
+.cancel-button:disabled {
+  background-color: #d9d9d9;
+  color: #777;
+  cursor: not-allowed;
+}

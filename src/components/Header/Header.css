@@ -1,11 +1,12 @@
 .header {
   height: 70px;
-  background-color: #a6a6a6;
+  background-color: #d5d4d4;
   display: grid;
-  grid-template-columns: 220px 1fr 120px;
+  grid-template-columns: 230px 1fr 140px;
   align-items: center;
-  padding: 0 18px;
+  padding: 0 24px;
   box-sizing: border-box;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .header-logo-container {
@@ -19,41 +20,71 @@
 }
 
 .header-title {
-  font-size: 16px;
-  font-weight: 700;
-  text-align: center;
   margin: 0;
-  color: #000;
+  text-align: center;
+  color: #111;
+  font-size: 28px;
+  font-weight: 700;
 }
 
-.header-icons {
+.header-actions {
   display: flex;
-  justify-content: flex-end;
   align-items: center;
-  gap: 18px;
+  justify-content: flex-end;
+  gap: 14px;
 }
 
-.home-icon {
-  width: 32px;
-  height: 32px;
+.profile-button {
+  width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: 50%;
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.10);
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.profile-button:hover {
+  background-color: #eeeeee;
+  transform: translateY(-1px);
+}
+
+.profile-button img {
+  width: 24px;
+  height: 24px;
   object-fit: contain;
 }
 
 .menu-button {
-  width: 36px;
-  height: 30px;
+  width: 38px;
+  height: 38px;
   border: none;
-  background: transparent;
+  border-radius: 8px;
+  background-color: #ffffff;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  padding: 0;
+  justify-content: center;
+  gap: 5px;
+  padding: 0 8px;
   cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.10);
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.menu-button:hover {
+  background-color: #eeeeee;
+  transform: translateY(-1px);
 }
 
 .menu-button span {
   display: block;
-  width: 36px;
-  height: 5px;
-  background-color: #000;
+  width: 100%;
+  height: 3px;
+  background-color: #111;
+  border-radius: 4px;
 }

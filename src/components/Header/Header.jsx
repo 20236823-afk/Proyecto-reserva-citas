@@ -1,5 +1,5 @@
 import logo from '../../assets/logo.svg'
-import casa from '../../assets/casa.png'
+import perfilIcono from '../../assets/perfil_icono.png'
 import './Header.css'
 
 const Header = () => {
@@ -11,10 +11,12 @@ const Header = () => {
 
       <h1 className="header-title">Sistema de reserva de servicios</h1>
 
-      <div className="header-icons">
-        <img src={casa} alt="Inicio" className="home-icon" />
+      <div className="header-actions">
+        <button className="profile-button">
+          <img src={perfilIcono} alt="Perfil del estudiante" />
+        </button>
 
-        <button className="menu-button">
+        <button className="menu-button" aria-label="Menú">
           <span></span>
           <span></span>
           <span></span>

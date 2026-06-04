@@ -1,7 +1,6 @@
 .app {
   width: 100%;
   min-height: 100vh;
-  border: 3px solid #222;
   box-sizing: border-box;
   font-family: Arial, Helvetica, sans-serif;
 }
