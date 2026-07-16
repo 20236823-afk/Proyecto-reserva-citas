@@ -2,48 +2,47 @@ import { useState } from 'react'
 import logo from '../../assets/logo.svg'
 import './Login.css'
 
-// Usuarios de demostración (mientras no haya backend).
-// Más adelante esta validación se reemplazará por una consulta al servidor.
-const usuarios = [
-  {
-    rol: 'admin',
-    nombre: 'Administrador ULima',
-    correo: 'admin@ulima.edu.pe',
-    codigo: '—',
-    password: 'admin123'
-  },
-  {
-    rol: 'estudiante',
-    nombre: 'Antonio Sifuentes',
-    correo: 'alumno@ulima.edu.pe',
-    codigo: '20236823',
-    password: 'alumno123'
-  }
-]
+// url del backend, cambiar cuando este desplegado
+const API_URL = 'http://localhost:3005/api'
 
-// onLogin: función que recibe App.jsx para saber quién inició sesión
 const Login = ({ onLogin }) => {
   const [correo, setCorreo] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [cargando, setCargando] = useState(false) // para el boton mientras espera la api
 
-  const iniciarSesion = () => {
+  const iniciarSesion = async () => {
     if (!correo || !password) {
       setError('Completa tu correo y contraseña.')
       return
     }
 
-    const usuarioEncontrado = usuarios.find(
-      (u) => u.correo === correo.trim().toLowerCase() && u.password === password
-    )
-
-    if (!usuarioEncontrado) {
-      setError('Correo o contraseña incorrectos.')
-      return
-    }
-
     setError('')
-    onLogin(usuarioEncontrado) // le avisa a App quién entró
+    setCargando(true)
+
+    try {
+      // pega al endpoint de login del backend
+      const respuesta = await fetch(`${API_URL}/usuarios/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ correo, password })
+      })
+
+      const datos = await respuesta.json()
+
+      if (!respuesta.ok) {
+        // el backend ya manda el mensaje de error armado
+        setError(datos.message || 'Correo o contraseña incorrectos.')
+        return
+      }
+
+      onLogin(datos) // datos = el usuario que devolvio la api
+    } catch (err) {
+      console.error(err)
+      setError('No se pudo conectar con el servidor. Intenta de nuevo.')
+    } finally {
+      setCargando(false)
+    }
   }
 
   const manejarEnter = (event) => {
@@ -81,8 +80,8 @@ const Login = ({ onLogin }) => {
 
         {error && <p className="login-error">{error}</p>}
 
-        <button className="login-button" onClick={iniciarSesion}>
-          Ingresar
+        <button className="login-button" onClick={iniciarSesion} disabled={cargando}>
+          {cargando ? 'Ingresando...' : 'Ingresar'}
         </button>
 
         <div className="login-ayuda">
