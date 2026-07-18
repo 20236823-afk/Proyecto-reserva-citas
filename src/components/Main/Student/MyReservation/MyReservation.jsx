@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import './MyReservation.css'
 
-const MyReservation = ({ reservas, cancelarReserva }) => {
+const MyReservation = ({ reservas, cancelarReserva, loadingReservas, errorReservas, procesandoReservaId }) => {
   const [filtroEstado, setFiltroEstado] = useState('Todas')
   const [reservaSeleccionada, setReservaSeleccionada] = useState(null)
 
-  const reservasFiltradas = filtroEstado === 'Todas' ? reservas : reservas.filter((reserva) => reserva.estado === filtroEstado)
+  const reservasFiltradas = filtroEstado === 'Todas' 
+    ? reservas 
+    : reservas.filter((reserva) => reserva.estado === filtroEstado)
 
   const verDetalleReserva = (reserva) => {
     setReservaSeleccionada(reserva)
@@ -15,8 +17,46 @@ const MyReservation = ({ reservas, cancelarReserva }) => {
     setReservaSeleccionada(null)
   }
 
+  const formatearFecha = (fechaStr) => {
+    if (!fechaStr) return ''
+    const partes = fechaStr.split('-')
+    if (partes.length === 3) {
+      return `${partes[2]}/${partes[1]}/${partes[0]}`
+    }
+    return fechaStr
+  }
+
+  const formatearHora = (horaStr) => {
+    if (!horaStr) return ''
+    return horaStr.substring(0, 5)
+  }
+
+  const calcularHoraFin = (horaInicio, duracion) => {
+    if (!horaInicio) return ''
+    const tiempo = duracion || 60
+    const partes = horaInicio.split(':')
+    const horas = parseInt(partes[0], 10)
+    const minutos = parseInt(partes[1], 10)
+    
+    const fechaBase = new Date()
+    fechaBase.setHours(horas, minutos + tiempo, 0)
+    
+    const horasFin = String(fechaBase.getHours()).padStart(2, '0')
+    const minutosFin = String(fechaBase.getMinutes()).padStart(2, '0')
+    return `${horasFin}:${minutosFin}`
+  }
+
+  if (loadingReservas) {
+    return (
+      <section className="my-reservations">
+        <div className="empty-reservations">Cargando tus reservas reales desde el sistema...</div>
+      </section>
+    )
+  }
+
   return (
     <section className="my-reservations">
+      {errorReservas && <div className="error-message-banner">{errorReservas}</div>}
 
       {reservaSeleccionada && (
         <div className="reservation-modal-overlay">
@@ -44,33 +84,30 @@ const MyReservation = ({ reservas, cancelarReserva }) => {
               </div>
 
               <div className="modal-row">
-                <span>Campus:</span>
-                <strong>{reservaSeleccionada.campus || 'Mayorazgo'}</strong>
+                <span>Servicio:</span>
+                <strong>{reservaSeleccionada.Servicio?.nombre || 'General'}</strong>
               </div>
 
               <div className="modal-row">
                 <span>Ubicación:</span>
-                <strong>{reservaSeleccionada.local}</strong>
+                <strong>{reservaSeleccionada.Local?.nombre || 'No asignado'}</strong>
               </div>
 
               <div className="modal-row">
                 <span>Recurso:</span>
-                <strong>{reservaSeleccionada.recurso}</strong>
-              </div>
-
-              <div className="modal-row">
-                <span>Detalle:</span>
-                <strong>{reservaSeleccionada.detalle}</strong>
+                <strong>{reservaSeleccionada.Recurso?.nombre || 'No asignado'}</strong>
               </div>
 
               <div className="modal-row">
                 <span>Fecha:</span>
-                <strong>{reservaSeleccionada.fecha}</strong>
+                <strong>{formatearFecha(reservaSeleccionada.fecha)}</strong>
               </div>
 
               <div className="modal-row">
                 <span>Horario:</span>
-                <strong>{reservaSeleccionada.horario}</strong>
+                <strong>
+                  {formatearHora(reservaSeleccionada.horaInicio)} - {calcularHoraFin(reservaSeleccionada.horaInicio, reservaSeleccionada.duracion)}
+                </strong>
               </div>
 
               <div className="modal-row">
@@ -81,11 +118,16 @@ const MyReservation = ({ reservas, cancelarReserva }) => {
 
             <div className="modal-section">
               <h3>Participantes</h3>
-
-              <div className="participant-summary-modal">
-                <span>{reservaSeleccionada.codigoEstudiante || '20236823'}</span>
-                <strong>{reservaSeleccionada.nombreEstudiante || 'Antonio Sifuentes Linares'}</strong>
-              </div>
+              {reservaSeleccionada.Participantes && reservaSeleccionada.Participantes.length > 0 ? (
+                reservaSeleccionada.Participantes.map((p, index) => (
+                  <div className="participant-summary-modal" key={index} style={{ marginBottom: '8px' }}>
+                    <span>{p.codigo || 'S/C'}</span>
+                    <strong>{p.nombre}</strong>
+                  </div>
+                ))
+              ) : (
+                <div className="summary-description">No se registraron participantes adicionales.</div>
+              )}
             </div>
           </div>
         </div>
@@ -128,7 +170,7 @@ const MyReservation = ({ reservas, cancelarReserva }) => {
               <th>ID Reserva</th>
               <th>Local</th>
               <th>Recurso</th>
-              <th>Detalle</th>
+              <th>Servicio</th>
               <th>Fecha</th>
               <th>Horario</th>
               <th>Estado</th>
@@ -140,11 +182,13 @@ const MyReservation = ({ reservas, cancelarReserva }) => {
             {reservasFiltradas.map((reserva) => (
               <tr key={reserva.id}>
                 <td>{reserva.id}</td>
-                <td>{reserva.local}</td>
-                <td>{reserva.recurso}</td>
-                <td>{reserva.detalle}</td>
-                <td>{reserva.fecha}</td>
-                <td>{reserva.horario}</td>
+                <td>{reserva.Local?.nombre || 'No asignado'}</td>
+                <td>{reserva.Recurso?.nombre || 'No asignado'}</td>
+                <td>{reserva.Servicio?.nombre || 'General'}</td>
+                <td>{formatearFecha(reserva.fecha)}</td>
+                <td>
+                  {formatearHora(reserva.horaInicio)} - {calcularHoraFin(reserva.horaInicio, reserva.duracion)}
+                </td>
                 <td>
                   <span className={`status-badge ${reserva.estado.toLowerCase()}`}>
                     {reserva.estado}
@@ -161,10 +205,10 @@ const MyReservation = ({ reservas, cancelarReserva }) => {
 
                     <button
                       className="cancel-button"
-                      disabled={reserva.estado === 'Cancelado'}
+                      disabled={reserva.estado === 'Cancelado' || procesandoReservaId === reserva.id}
                       onClick={() => cancelarReserva(reserva.id)}
                     >
-                      Cancelar
+                      {procesandoReservaId === reserva.id ? 'Cancelando...' : 'Cancelar'}
                     </button>
                   </div>
                 </td>

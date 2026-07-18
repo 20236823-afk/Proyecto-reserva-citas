@@ -8,46 +8,12 @@ import ReservationSummary from './Student/ReservationSummary/ReservationSummary'
 import MyReservation from './Student/MyReservation/MyReservation'
 import News from './Student/News/News'
 
+import ReservasApi from '../../api/reservas.js'
+import ParticipantesApi from '../../api/participantes.js'
+import HorariosApi from '../../api/horarios.js'
+
 import './Main.css'
 
-const reservasIniciales = [
-  {
-    id: '0000309481',
-    local: 'Centro Deportivo Mayorazgo',
-    recurso: 'Basket cancha completa',
-    detalle: 'Cancha completa',
-    fecha: '03/06/2026',
-    horario: '07:00 - 07:50',
-    estado: 'Cancelado'
-  },
-  {
-    id: '0000305573',
-    local: 'Centro Deportivo Mayorazgo',
-    recurso: 'Basket media cancha',
-    detalle: 'Media cancha',
-    fecha: '29/05/2026',
-    horario: '10:00 - 10:50',
-    estado: 'Cancelado'
-  },
-  {
-    id: '0000305293',
-    local: 'Centro Deportivo Mayorazgo',
-    recurso: 'Piscina',
-    detalle: 'Carril de natación',
-    fecha: '28/05/2026',
-    horario: '15:00 - 15:50',
-    estado: 'Confirmado'
-  },
-  {
-    id: '0000306210',
-    local: 'Biblioteca Central',
-    recurso: 'Cubículo de estudio',
-    detalle: 'Cubículo grupal',
-    fecha: '05/06/2026',
-    horario: '12:00 - 13:00',
-    estado: 'Pendiente'
-  }
-]
 
 const datosReservaIniciales = {
   nombre: '',
@@ -59,20 +25,59 @@ const datosReservaIniciales = {
   horarioId: null,
   fecha: '',
   horaInicio: '',
-  duracion: null
+  duracion: null,
+  participantes: [] // Ampliado para soportar participantes en el estado central
 }
 
-const Main = ({ currentSection, setCurrentSection }) => {
+const Main = ({ currentSection, setCurrentSection, usuario }) => {
+  const usuarioAutenticado = usuario || { id: 2, nombre: 'Usuario Prueba' }
+
   const [paso, setPaso] = useState(1)
-  const [reservas, setReservas] = useState(reservasIniciales)
+  const [reservas, setReservas] = useState([]) // Inicialmente vacío, se llena desde PostgreSQL
   const [servicioSeleccionado, setServicioSeleccionado] = useState(null)
   const [datosReserva, setDatosReserva] = useState(datosReservaIniciales)
+
+  const [loadingReservas, setLoadingReservas] = useState(false)
+  const [confirmando, setConfirmando] = useState(false)
+  const [procesandoReservaId, setProcesandoReservaId] = useState(null)
+  const [errorReservas, setErrorReservas] = useState(null)
+  const [errorReserva, setErrorReserva] = useState(null)
+
+  const cargarReservas = async () => {
+    if (!usuarioAutenticado?.id) return
+
+    try {
+      setLoadingReservas(true)
+      setErrorReservas(null)
+
+      const datos = await ReservasApi.findAll()
+
+      // Filtrar únicamente las reservas pertenecientes al usuario autenticado
+      const reservasDelUsuario = datos.filter(
+        (reserva) => Number(reserva.usuarioId) === Number(usuarioAutenticado.id)
+      )
+
+      setReservas(reservasDelUsuario)
+    } catch (error) {
+      console.error(error)
+      setErrorReservas('No se pudieron cargar las reservas de la base de datos.')
+    } finally {
+      setLoadingReservas(false)
+    }
+  }
+
+  useEffect(() => {
+    if (usuarioAutenticado?.id) {
+      cargarReservas()
+    }
+  }, [usuarioAutenticado?.id, currentSection])
 
   useEffect(() => {
     if (currentSection === 'nueva-reserva') {
       setPaso(1)
       setServicioSeleccionado(null)
       setDatosReserva(datosReservaIniciales)
+      setErrorReserva(null)
     }
   }, [currentSection])
 
@@ -94,57 +99,121 @@ const Main = ({ currentSection, setCurrentSection }) => {
       horarioId: null,
       fecha: '',
       horaInicio: '',
-      duracion: null
+      duracion: null,
+      participantes: []
     }))
 
     setPaso(2)
   }
 
-  const agregarReserva = () => {
-    const nuevaReserva = {
-      id: `0000${Math.floor(Math.random() * 900000 + 100000)}`,
-      local: 'Centro Deportivo Mayorazgo',
-      recurso: servicioSeleccionado
-        ? servicioSeleccionado.nombre
-        : 'Servicio no seleccionado',
-      detalle: servicioSeleccionado
-        ? servicioSeleccionado.nombre
-        : 'Sin detalle',
-      fecha: datosReserva.fecha || 'Sin fecha',
-      horario: datosReserva.horaInicio || 'Sin horario',
-      estado: 'Confirmado'
+  const confirmarReserva = async () => {
+    if (!usuarioAutenticado?.id) {
+      setErrorReserva('No se identificó al usuario autenticado.')
+      return
     }
 
-    setReservas((reservasActuales) => [
-      nuevaReserva,
-      ...reservasActuales
-    ])
+    if (
+      !datosReserva.servicioId ||
+      !datosReserva.localId ||
+      !datosReserva.recursoId ||
+      !datosReserva.fecha ||
+      !datosReserva.horaInicio ||
+      !datosReserva.duracion
+    ) {
+      setErrorReserva('Faltan datos obligatorios para completar la reserva.')
+      return
+    }
 
-    setDatosReserva(datosReservaIniciales)
-    setServicioSeleccionado(null)
-    setPaso(1)
-    setCurrentSection('mis-reservas')
-  }
+    try {
+      setConfirmando(true)
+      setErrorReserva(null)
 
-  const cancelarReserva = (id) => {
-    const nuevasReservas = reservas.map((reserva) => {
-      if (reserva.id === id) {
-        return {
-          ...reserva,
-          estado: 'Cancelado'
+      const reservaCreada = await ReservasApi.create({
+        usuarioId: usuarioAutenticado.id,
+        servicioId: datosReserva.servicioId,
+        localId: datosReserva.localId,
+        recursoId: datosReserva.recursoId,
+        fecha: datosReserva.fecha,
+        horaInicio: datosReserva.horaInicio,
+        duracion: datosReserva.duracion,
+        estado: 'Pendiente'
+      })
+
+      if (reservaCreada === null) {
+        setErrorReserva('No se pudo crear la reserva en el servidor.')
+        return
+      }
+
+      const participantesValidos = datosReserva.participantes.filter(
+        (p) => p.nombre && p.nombre.trim() !== ''
+      )
+
+      for (const participante of participantesValidos) {
+        await ParticipantesApi.create({
+          nombre: participante.nombre.trim(),
+          codigo: participante.codigo ? participante.codigo.trim() : '',
+          reservaId: reservaCreada.id
+        })
+      }
+
+      // 3. Modificar el estado del horario a Ocupado si está integrado
+      if (datosReserva.horarioId) {
+        try {
+          await HorariosApi.update(datosReserva.horarioId, {
+            estado: 'Ocupado'
+          })
+        } catch (errorHorario) {
+          console.error('Inconsistencia: No se pudo actualizar el estado del horario.', errorHorario)
         }
       }
 
-      return reserva
-    })
+      await cargarReservas()
 
-    setReservas(nuevasReservas)
+      setDatosReserva(datosReservaIniciales)
+      setServicioSeleccionado(null)
+      setPaso(1)
+      setCurrentSection('mis-reservas')
+    } catch (error) {
+      console.error(error)
+      setErrorReserva('Ocurrió un error al registrar la reserva.')
+    } finally {
+      setConfirmando(false)
+    }
+  }
+
+  // Flujo real de cancelación: PUT /api/reservas/:id cambiando el estado a 'Cancelado'
+  const cancelarReserva = async (id) => {
+    const confirmar = window.confirm('¿Deseas cancelar esta reserva?')
+    if (!confirmar) return
+
+    try {
+      setProcesandoReservaId(id)
+      setErrorReservas(null)
+
+      const actualizada = await ReservasApi.update(id, {
+        estado: 'Cancelado'
+      })
+
+      if (actualizada === null) {
+        setErrorReservas('No se pudo cancelar la reserva en el servidor.')
+        return
+      }
+
+      await cargarReservas()
+    } catch (error) {
+      console.error(error)
+      setErrorReservas('No se pudo procesar la cancelación.')
+    } finally {
+      setProcesandoReservaId(null)
+    }
   }
 
   return (
     <main className="main">
       {currentSection === 'nueva-reserva' && (
         <>
+          {errorReserva && <div className="error-message-banner">{errorReserva}</div>}
+          
           {paso === 1 && (
             <ReservationStart
               seleccionarServicio={seleccionarServicio}
@@ -175,15 +244,18 @@ const Main = ({ currentSection, setCurrentSection }) => {
             <Participants
               volverPaso={() => setPaso(3)}
               siguientePaso={() => setPaso(5)}
+              datosReserva={datosReserva}
+              actualizarDatosReserva={actualizarDatosReserva}
             />
           )}
 
           {paso === 5 && (
             <ReservationSummary
               volverPaso={() => setPaso(4)}
-              confirmarReserva={agregarReserva}
+              confirmarReserva={confirmarReserva}
               servicioSeleccionado={servicioSeleccionado}
               datosReserva={datosReserva}
+              confirmando={confirmando}
             />
           )}
         </>
@@ -193,6 +265,9 @@ const Main = ({ currentSection, setCurrentSection }) => {
         <MyReservation
           reservas={reservas}
           cancelarReserva={cancelarReserva}
+          loadingReservas={loadingReservas}
+          errorReservas={errorReservas}
+          procesandoReservaId={procesandoReservaId}
         />
       )}
 

@@ -1,7 +1,7 @@
 import ReservationSteps from '../reservationSteps/reservationSteps'
 import './ReservationSummary.css'
 
-const ReservationSummary = ({ volverPaso, confirmarReserva, servicioSeleccionado }) => {
+const ReservationSummary = ({ volverPaso, confirmarReserva, servicioSeleccionado, datosReserva, confirmando }) => {
   return (
     <section className="summary-page">
       <ReservationSteps pasoActual={3} />
@@ -18,34 +18,42 @@ const ReservationSummary = ({ volverPaso, confirmarReserva, servicioSeleccionado
 
           <div className="summary-row">
             <span>Campus:</span>
-            <strong>Mayorazgo</strong>
+            <strong>{datosReserva?.campus || 'No especificado'}</strong>
           </div>
 
           <div className="summary-row">
             <span>Ubicación:</span>
-            <strong>Centro Deportivo Mayorazgo</strong>
+            <strong>{datosReserva?.localNombre || 'Local no seleccionado'}</strong>
           </div>
 
           <div className="summary-row">
             <span>Recurso:</span>
             <strong>
-              {servicioSeleccionado ? servicioSeleccionado.nombre : 'Servicio no seleccionado'}
+              {datosReserva?.recursoNombre || (servicioSeleccionado ? servicioSeleccionado.nombre : 'Servicio no seleccionado')}
             </strong>
           </div>
 
           <div className="summary-row">
             <span>Horario:</span>
-            <strong>Jue 04/06 - 10:00</strong>
+            <strong>
+              {datosReserva?.fecha ? datosReserva.fecha : ''} {datosReserva?.horaInicio ? `- ${datosReserva.horaInicio.substring(0, 5)}` : ''}
+            </strong>
           </div>
         </div>
 
         <div className="summary-section">
           <h3>Participantes</h3>
 
-          <div className="participant-summary">
-            <span>20236823</span>
-            <strong>Antonio Sifuentes Linares</strong>
-          </div>
+          {datosReserva?.participantes && datosReserva.participantes.length > 0 ? (
+            datosReserva.participantes.map((p, index) => (
+              <div className="participant-summary" key={index}>
+                <span>{p.codigo || 'S/C'}</span>
+                <strong>{p.nombre}</strong>
+              </div>
+            ))
+          ) : (
+            <p className="summary-description">Sin participantes registrados</p>
+          )}
         </div>
 
         <div className="summary-buttons">
@@ -53,6 +61,7 @@ const ReservationSummary = ({ volverPaso, confirmarReserva, servicioSeleccionado
             type="button"
             className="summary-back-button"
             onClick={volverPaso}
+            disabled={confirmando}
           >
             Anterior
           </button>
@@ -61,8 +70,9 @@ const ReservationSummary = ({ volverPaso, confirmarReserva, servicioSeleccionado
             type="button"
             className="summary-confirm-button"
             onClick={confirmarReserva}
+            disabled={confirmando}
           >
-            Confirmar reserva
+            {confirmando ? 'Confirmando...' : 'Confirmar reserva'}
           </button>
         </div>
       </div>

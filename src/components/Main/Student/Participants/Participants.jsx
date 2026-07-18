@@ -1,27 +1,61 @@
-import { useState } from 'react'
 import ReservationSteps from '../reservationSteps/reservationSteps'
 import './Participants.css'
 
-const Participants = ({ volverPaso, siguientePaso }) => {
-  const [participantes, setParticipantes] = useState([
-    {
-      codigo: '20236823',
-      nombre: 'Antonio Sifuentes Linares'
-    }
-  ])
+const Participants = ({ volverPaso, siguientePaso, datosReserva, actualizarDatosReserva }) => {
+  const listaParticipantes = datosReserva?.participantes?.length > 0 
+    ? datosReserva.participantes 
+    : [{ codigo: '', nombre: '' }]
+
+  const manejarCambioInput = (indice, campo, valor) => {
+    const nuevaLista = listaParticipantes.map((participante, i) => {
+      if (i === indice) {
+        return {
+          ...participante,
+          [campo]: valor
+        }
+      }
+      return participante
+    })
+
+    actualizarDatosReserva({
+      participantes: nuevaLista
+    })
+  }
 
   const agregarParticipante = () => {
     const nuevoParticipante = {
       codigo: '',
       nombre: ''
     }
-
-    setParticipantes([...participantes, nuevoParticipante])
+    actualizarDatosReserva({
+      participantes: [...listaParticipantes, nuevoParticipante]
+    })
   }
 
   const eliminarParticipante = (indice) => {
-    const nuevaLista = participantes.filter((participante, i) => i !== indice)
-    setParticipantes(nuevaLista)
+    if (listaParticipantes.length === 1) {
+      actualizarDatosReserva({
+        participantes: [{ codigo: '', nombre: '' }]
+      })
+      return
+    }
+    
+    const nuevaLista = listaParticipantes.filter((_, i) => i !== indice)
+    actualizarDatosReserva({
+      participantes: nuevaLista
+    })
+  }
+
+  const manejarSiguiente = () => {
+    const filtrados = listaParticipantes.filter(
+      (p) => p.nombre.trim() !== '' || p.codigo.trim() !== ''
+    )
+
+    actualizarDatosReserva({
+      participantes: filtrados
+    })
+
+    siguientePaso()
   }
 
   return (
@@ -38,18 +72,20 @@ const Participants = ({ volverPaso, siguientePaso }) => {
             <span>Acciones</span>
           </div>
 
-          {participantes.map((participante, index) => (
+          {listaParticipantes.map((participante, index) => (
             <div className="table-row" key={index}>
               <input
                 type="text"
                 placeholder="Código"
-                defaultValue={participante.codigo}
+                value={participante.codigo}
+                onChange={(e) => manejarCambioInput(index, 'codigo', e.target.value)}
               />
 
               <input
                 type="text"
                 placeholder="Nombre"
-                defaultValue={participante.nombre}
+                value={participante.nombre}
+                onChange={(e) => manejarCambioInput(index, 'nombre', e.target.value)}
               />
 
               <div className="table-actions">
@@ -80,7 +116,7 @@ const Participants = ({ volverPaso, siguientePaso }) => {
           <button
             type="button"
             className="participants-next-button"
-            onClick={siguientePaso}
+            onClick={manejarSiguiente}
           >
             Siguiente
           </button>
