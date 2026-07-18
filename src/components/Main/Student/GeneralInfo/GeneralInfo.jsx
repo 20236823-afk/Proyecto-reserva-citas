@@ -1,7 +1,106 @@
+import { useEffect, useState } from 'react'
 import ReservationSteps from '../reservationSteps/reservationSteps'
+import LocalesApi from '../../../../api/locales.js'
+import RecursosApi from '../../../../api/recursos.js'
 import './GeneralInfo.css'
 
-const GeneralInfo = ({ volverPaso, siguientePaso }) => {
+const GeneralInfo = ({
+  volverPaso,
+  siguientePaso,
+  servicioSeleccionado,
+  datosReserva = {},
+  actualizarDatosReserva
+}) => {
+  const [locales, setLocales] = useState([])
+  const [recursos, setRecursos] = useState([])
+  const [cargando, setCargando] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    const cargarDatos = async () => {
+      setCargando(true)
+      setError('')
+
+      const localesObtenidos = await LocalesApi.findAll()
+      const recursosObtenidos = await RecursosApi.findAll()
+
+      if (
+        localesObtenidos.length === 0 ||
+        recursosObtenidos.length === 0
+      ) {
+        setError('No se pudieron cargar los locales o recursos.')
+      }
+
+      setLocales(localesObtenidos)
+      setRecursos(recursosObtenidos)
+      setCargando(false)
+    }
+
+    cargarDatos()
+  }, [])
+
+  const servicioId = Number(
+    servicioSeleccionado?.id || datosReserva.servicioId
+  )
+
+  const localIdSeleccionado = datosReserva.localId
+    ? Number(datosReserva.localId)
+    : null
+
+  const recursoIdSeleccionado = datosReserva.recursoId
+    ? Number(datosReserva.recursoId)
+    : null
+
+  const recursosFiltrados = recursos.filter((recurso) => {
+    return (
+      Number(recurso.servicioId) === servicioId &&
+      Number(recurso.localId) === localIdSeleccionado &&
+      recurso.estado === 'Disponible'
+    )
+  })
+
+  const manejarCambioNombre = (event) => {
+    actualizarDatosReserva({
+      nombre: event.target.value
+    })
+  }
+
+  const manejarCambioCodigo = (event) => {
+    actualizarDatosReserva({
+      codigo: event.target.value
+    })
+  }
+
+  const manejarCambioCampus = (event) => {
+    actualizarDatosReserva({
+      campus: event.target.value
+    })
+  }
+
+  const manejarCambioLocal = (event) => {
+    const valor = event.target.value
+
+    actualizarDatosReserva({
+      localId: valor === '' ? null : Number(valor),
+      recursoId: null
+    })
+  }
+
+  const manejarCambioRecurso = (event) => {
+    const valor = event.target.value
+
+    actualizarDatosReserva({
+      recursoId: valor === '' ? null : Number(valor)
+    })
+  }
+
+  const puedeAvanzar =
+    datosReserva.nombre?.trim() !== '' &&
+    datosReserva.codigo?.trim() !== '' &&
+    datosReserva.campus !== '' &&
+    localIdSeleccionado !== null &&
+    recursoIdSeleccionado !== null
+
   return (
     <section className="general-info-page">
       <ReservationSteps />
@@ -12,39 +111,95 @@ const GeneralInfo = ({ volverPaso, siguientePaso }) => {
         <form className="general-form">
           <div className="form-row">
             <label>*Ingresar Nombre</label>
-            <input type="text" placeholder="Ingrese su nombre" />
+
+            <input
+              type="text"
+              placeholder="Ingrese su nombre"
+              value={datosReserva.nombre || ''}
+              onChange={manejarCambioNombre}
+            />
           </div>
 
           <div className="form-row">
             <label>*Ingresar Código</label>
-            <input type="text" placeholder="Ingrese su código" />
+
+            <input
+              type="text"
+              placeholder="Ingrese su código"
+              value={datosReserva.codigo || ''}
+              onChange={manejarCambioCodigo}
+            />
           </div>
 
           <div className="form-row">
             <label>*Campus</label>
-            <select>
-              <option>Mayorazgo</option>
-              <option>Monterrico</option>
+
+            <select
+              value={datosReserva.campus || ''}
+              onChange={manejarCambioCampus}
+            >
+              <option value="">Seleccione un campus</option>
+              <option value="Mayorazgo">Mayorazgo</option>
+              <option value="Monterrico">Monterrico</option>
             </select>
           </div>
 
           <div className="form-row">
             <label>*Ubicación</label>
-            <select>
-              <option>Centro Deportivo Mayorazgo</option>
-              <option>Biblioteca Central</option>
-              <option>Laboratorio de Cómputo</option>
+
+            <select
+              value={localIdSeleccionado || ''}
+              onChange={manejarCambioLocal}
+              disabled={cargando}
+            >
+              <option value="">
+                {cargando
+                  ? 'Cargando ubicaciones...'
+                  : 'Seleccione una ubicación'}
+              </option>
+
+              {locales.map((local) => (
+                <option key={local.id} value={local.id}>
+                  {local.nombre}
+                </option>
+              ))}
             </select>
           </div>
 
           <div className="form-row">
             <label>*Recurso</label>
-            <select>
-              <option>Basket media cancha</option>
-              <option>Sala de estudio grupal</option>
-              <option>Equipo de laboratorio</option>
+
+            <select
+              value={recursoIdSeleccionado || ''}
+              onChange={manejarCambioRecurso}
+              disabled={cargando || localIdSeleccionado === null}
+            >
+              <option value="">
+                {localIdSeleccionado === null
+                  ? 'Seleccione primero una ubicación'
+                  : 'Seleccione un recurso'}
+              </option>
+
+              {recursosFiltrados.map((recurso) => (
+                <option key={recurso.id} value={recurso.id}>
+                  {recurso.nombre}
+                </option>
+              ))}
+
+              {localIdSeleccionado !== null &&
+                recursosFiltrados.length === 0 && (
+                  <option value="" disabled>
+                    No hay recursos disponibles
+                  </option>
+                )}
             </select>
           </div>
+
+          {error && (
+            <p className="general-error">
+              {error}
+            </p>
+          )}
 
           <div className="form-row">
             <label>*Seleccionar horario</label>
@@ -53,6 +208,7 @@ const GeneralInfo = ({ volverPaso, siguientePaso }) => {
               type="button"
               className="schedule-open-button"
               onClick={siguientePaso}
+              disabled={!puedeAvanzar}
             >
               Seleccionar horario
             </button>
@@ -72,6 +228,7 @@ const GeneralInfo = ({ volverPaso, siguientePaso }) => {
             className="next-button"
             type="button"
             onClick={siguientePaso}
+            disabled={!puedeAvanzar}
           >
             Siguiente
           </button>
