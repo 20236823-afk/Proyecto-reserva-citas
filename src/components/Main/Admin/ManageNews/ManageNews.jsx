@@ -1,51 +1,177 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import NoticiasApi from '../../../../api/noticias.js'
 import './ManageNews.css'
 
-const noticiasIniciales = [
-  { id: 1, titulo: 'Semana universitaria', categoria: 'Evento', fecha: '10/06/2026', descripcion: 'Actividades deportivas, culturales y académicas organizadas por la universidad.', estado: 'Publicada' },
-  { id: 2, titulo: 'Mantenimiento de laboratorios', categoria: 'Comunicado', fecha: '15/06/2026', descripcion: 'Algunos laboratorios no estarán disponibles durante el mantenimiento programado.', estado: 'Publicada' },
-  { id: 3, titulo: 'Nuevo horario de biblioteca', categoria: 'Noticia', fecha: '20/06/2026', descripcion: 'La biblioteca central amplía su horario de atención durante el ciclo.', estado: 'Borrador' }
-]
-
-const categorias = ['Noticia', 'Comunicado', 'Evento']
-const filtros = ['Todas', 'Noticia', 'Comunicado', 'Evento']
+const categorias = ['Noticia', 'Comunicado', 'Evento', 'Deportes']
+const filtros = ['Todas', 'Noticia', 'Comunicado', 'Evento', 'Deportes']
 
 const ManageNews = () => {
-  const [noticias, setNoticias] = useState(noticiasIniciales)
+  const [noticias, setNoticias] = useState([])
   const [filtro, setFiltro] = useState('Todas')
-  // Estado del formulario para crear una noticia nueva
-  const [nueva, setNueva] = useState({ titulo: '', categoria: 'Noticia', descripcion: '' })
+  const [nueva, setNueva] = useState({
+    titulo: '',
+    categoria: 'Noticia',
+    descripcion: ''
+  })
 
-  const set = (campo, valor) => setNueva({ ...nueva, [campo]: valor })
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [creando, setCreando] = useState(false)
+  const [procesandoId, setProcesandoId] = useState(null)
 
-  const crearNoticia = () => {
-    if (!nueva.titulo || !nueva.descripcion) return
-    const fechaHoy = new Date().toLocaleDateString('es-PE')
-    const noticia = {
-      id: Date.now(),
-      titulo: nueva.titulo,
-      categoria: nueva.categoria,
-      fecha: fechaHoy,
-      descripcion: nueva.descripcion,
-      estado: 'Borrador'
+  const cargarNoticias = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      const datos = await NoticiasApi.findAll()
+      setNoticias(datos)
+    } catch (error) {
+      console.error(error)
+      setError('No se pudieron cargar las noticias.')
+    } finally {
+      setLoading(false)
     }
-    setNoticias([noticia, ...noticias])
-    setNueva({ titulo: '', categoria: 'Noticia', descripcion: '' })
   }
 
-  const alternarEstado = (id) => {
-    setNoticias(noticias.map((n) =>
-      n.id === id ? { ...n, estado: n.estado === 'Publicada' ? 'Borrador' : 'Publicada' } : n
-    ))
+  useEffect(() => {
+    cargarNoticias()
+  }, [])
+
+  const actualizarNueva = (campo, valor) => {
+    setNueva({
+      ...nueva,
+      [campo]: valor
+    })
   }
 
-  const eliminarNoticia = (id) => {
-    setNoticias(noticias.filter((n) => n.id !== id))
+  const obtenerFechaActual = () => {
+    const hoy = new Date()
+    const anio = hoy.getFullYear()
+    const mes = String(hoy.getMonth() + 1).padStart(2, '0')
+    const dia = String(hoy.getDate()).padStart(2, '0')
+
+    return `${anio}-${mes}-${dia}`
   }
 
-  const noticiasFiltradas = filtro === 'Todas'
-    ? noticias
-    : noticias.filter((n) => n.categoria === filtro)
+  const formatearFecha = (fecha) => {
+    if (!fecha) {
+      return ''
+    }
+
+    const [anio, mes, dia] = fecha.split('-')
+    return `${dia}/${mes}/${anio}`
+  }
+
+  const crearNoticia = async () => {
+    if (nueva.titulo.trim() === '' || nueva.descripcion.trim() === '') {
+      setError('El título y la descripción son obligatorios.')
+      return
+    }
+
+    try {
+      setCreando(true)
+      setError(null)
+
+      const noticiaCreada = await NoticiasApi.create({
+        titulo: nueva.titulo.trim(),
+        categoria: nueva.categoria,
+        fecha: obtenerFechaActual(),
+        descripcion: nueva.descripcion.trim(),
+        estado: 'Borrador'
+      })
+
+      if (noticiaCreada === null) {
+        setError('No se pudo crear la publicación.')
+        return
+      }
+
+      setNueva({
+        titulo: '',
+        categoria: 'Noticia',
+        descripcion: ''
+      })
+
+      await cargarNoticias()
+    } catch (error) {
+      console.error(error)
+      setError('No se pudo crear la publicación.')
+    } finally {
+      setCreando(false)
+    }
+  }
+
+  const alternarEstado = async (noticia) => {
+    const nuevoEstado =
+      noticia.estado === 'Publicada'
+        ? 'Borrador'
+        : 'Publicada'
+
+    try {
+      setProcesandoId(noticia.id)
+      setError(null)
+
+      const noticiaActualizada = await NoticiasApi.update(noticia.id, {
+        estado: nuevoEstado
+      })
+
+      if (noticiaActualizada === null) {
+        setError('No se pudo cambiar el estado de la publicación.')
+        return
+      }
+
+      await cargarNoticias()
+    } catch (error) {
+      console.error(error)
+      setError('No se pudo cambiar el estado de la publicación.')
+    } finally {
+      setProcesandoId(null)
+    }
+  }
+
+  const eliminarNoticia = async (noticia) => {
+    const confirmar = window.confirm(
+      `¿Deseas eliminar la publicación "${noticia.titulo}"?`
+    )
+
+    if (!confirmar) {
+      return
+    }
+
+    try {
+      setProcesandoId(noticia.id)
+      setError(null)
+
+      const resultado = await NoticiasApi.remove(noticia.id)
+
+      if (resultado === null) {
+        setError('No se pudo eliminar la publicación.')
+        return
+      }
+
+      await cargarNoticias()
+    } catch (error) {
+      console.error(error)
+      setError('No se pudo eliminar la publicación.')
+    } finally {
+      setProcesandoId(null)
+    }
+  }
+
+  const noticiasFiltradas =
+    filtro === 'Todas'
+      ? noticias
+      : noticias.filter(
+          (noticia) => noticia.categoria === filtro
+        )
+
+  if (loading) {
+    return (
+      <section className="manage-news">
+        <p>Cargando noticias...</p>
+      </section>
+    )
+  }
 
   return (
     <section className="manage-news">
@@ -54,67 +180,120 @@ const ManageNews = () => {
         <p>Crea y administra noticias, comunicados y eventos.</p>
       </div>
 
-      {/* Formulario para crear una noticia */}
+      {error && <p>{error}</p>}
+
       <div className="news-form">
         <h3>Nueva publicación</h3>
+
         <div className="news-form-row">
           <input
             className="news-input"
             placeholder="Título"
             value={nueva.titulo}
-            onChange={(e) => set('titulo', e.target.value)}
+            onChange={(event) =>
+              actualizarNueva('titulo', event.target.value)
+            }
           />
+
           <select
             className="news-select"
             value={nueva.categoria}
-            onChange={(e) => set('categoria', e.target.value)}
+            onChange={(event) =>
+              actualizarNueva('categoria', event.target.value)
+            }
           >
-            {categorias.map((c) => <option key={c}>{c}</option>)}
+            {categorias.map((categoria) => (
+              <option key={categoria} value={categoria}>
+                {categoria}
+              </option>
+            ))}
           </select>
         </div>
+
         <textarea
           className="news-textarea"
           placeholder="Descripción"
           value={nueva.descripcion}
-          onChange={(e) => set('descripcion', e.target.value)}
+          onChange={(event) =>
+            actualizarNueva('descripcion', event.target.value)
+          }
         />
-        <button className="news-crear" onClick={crearNoticia}>Crear publicación</button>
+
+        <button
+          className="news-crear"
+          onClick={crearNoticia}
+          disabled={creando}
+        >
+          {creando ? 'Creando...' : 'Crear publicación'}
+        </button>
       </div>
 
-      {/* Filtros por categoría */}
       <div className="news-filtros">
-        {filtros.map((f) => (
+        {filtros.map((categoria) => (
           <button
-            key={f}
-            className={filtro === f ? 'news-filtro active' : 'news-filtro'}
-            onClick={() => setFiltro(f)}
+            key={categoria}
+            className={
+              filtro === categoria
+                ? 'news-filtro active'
+                : 'news-filtro'
+            }
+            onClick={() => setFiltro(categoria)}
           >
-            {f}
+            {categoria}
           </button>
         ))}
       </div>
 
-      {/* Lista de noticias */}
       <div className="news-lista">
         {noticiasFiltradas.length === 0 ? (
-          <p className="news-vacio">No hay publicaciones en esta categoría.</p>
+          <p className="news-vacio">
+            No hay publicaciones en esta categoría.
+          </p>
         ) : (
-          noticiasFiltradas.map((n) => (
-            <article className="news-item" key={n.id}>
+          noticiasFiltradas.map((noticia) => (
+            <article className="news-item" key={noticia.id}>
               <div className="news-item-top">
-                <span className="news-categoria">{n.categoria}</span>
-                <span className={n.estado === 'Publicada' ? 'news-estado publicada' : 'news-estado borrador'}>
-                  {n.estado}
+                <span className="news-categoria">
+                  {noticia.categoria}
+                </span>
+
+                <span
+                  className={
+                    noticia.estado === 'Publicada'
+                      ? 'news-estado publicada'
+                      : 'news-estado borrador'
+                  }
+                >
+                  {noticia.estado}
                 </span>
               </div>
-              <h3>{n.titulo}</h3>
-              <p className="news-fecha">{n.fecha}</p>
-              <p className="news-desc">{n.descripcion}</p>
+
+              <h3>{noticia.titulo}</h3>
+
+              <p className="news-fecha">
+                {formatearFecha(noticia.fecha)}
+              </p>
+
+              <p className="news-desc">
+                {noticia.descripcion}
+              </p>
+
               <div className="news-acciones">
-                <button className="news-btn-estado" onClick={() => alternarEstado(n.id)}>
-                  {n.estado === 'Publicada' ? 'Pasar a borrador' : 'Publicar'}
+                <button
+                  className="news-btn-estado"
+                  onClick={() => alternarEstado(noticia)}
+                  disabled={procesandoId === noticia.id}
+                >
+                  {noticia.estado === 'Publicada'
+                    ? 'Pasar a borrador'
+                    : 'Publicar'}
                 </button>
-                <button className="news-btn-eliminar" onClick={() => eliminarNoticia(n.id)}>
+
+                <button
+                  className="news-btn-eliminar"
+                  onClick={() => eliminarNoticia(noticia)}
+                  disabled={procesandoId === noticia.id}
+                >
                   Eliminar
                 </button>
               </div>

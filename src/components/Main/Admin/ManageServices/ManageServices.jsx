@@ -1,36 +1,97 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import ServiciosApi from '../../../../api/servicios.js'
 import './ManageServices.css'
 
-// Datos simulados de los servicios del campus
-const serviciosIniciales = [
-  { id: 1, nombre: 'Ambientes deportivos', descripcion: 'Canchas, piscina y espacios deportivos del campus.', reservas: 42, activo: true },
-  { id: 2, nombre: 'Reserva de ambientes técnicos (SERCOM)', descripcion: 'Salas y ambientes técnicos administrados por SERCOM.', reservas: 18, activo: true },
-  { id: 3, nombre: 'Reserva de Laboratorios', descripcion: 'Laboratorios de ciencias e ingeniería.', reservas: 27, activo: true },
-  { id: 4, nombre: 'Préstamo de equipos (SERCOM)', descripcion: 'Equipos audiovisuales y de cómputo en préstamo.', reservas: 31, activo: false },
-  { id: 5, nombre: 'Reserva de cubículos', descripcion: 'Cubículos de estudio individuales y grupales en biblioteca.', reservas: 10, activo: true }
-]
-
 const ManageServices = () => {
-  const [servicios, setServicios] = useState(serviciosIniciales)
-  const [editandoId, setEditandoId] = useState(null) // id del servicio que se esta editando
+  const [servicios, setServicios] = useState([])
+  const [editandoId, setEditandoId] = useState(null)
   const [textoEdicion, setTextoEdicion] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
-  // Activa o desactiva un servicio
-  const alternarActivo = (id) => {
-    setServicios(servicios.map((s) => (s.id === id ? { ...s, activo: !s.activo } : s)))
+  const cargarServicios = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      const datos = await ServiciosApi.findAll()
+      setServicios(datos)
+    } catch (error) {
+      console.error(error)
+      setError('No se pudieron cargar los servicios.')
+    } finally {
+      setLoading(false)
+    }
   }
 
-  // editar la descrip de un servicio
+  useEffect(() => {
+    cargarServicios()
+  }, [])
+
+  const alternarEstado = async (servicio) => {
+    try {
+      setError(null)
+
+      const actualizado = await ServiciosApi.update(servicio.id, {
+        estado: !servicio.estado
+      })
+
+      if (actualizado === null) {
+        setError('No se pudo actualizar el estado del servicio.')
+        return
+      }
+
+      await cargarServicios()
+    } catch (error) {
+      console.error(error)
+      setError('No se pudo actualizar el estado del servicio.')
+    }
+  }
+
   const empezarEdicion = (servicio) => {
     setEditandoId(servicio.id)
     setTextoEdicion(servicio.descripcion)
   }
 
-  // Guarda la nueva descripción
-  const guardarEdicion = (id) => {
-    setServicios(servicios.map((s) => (s.id === id ? { ...s, descripcion: textoEdicion } : s)))
+  const cancelarEdicion = () => {
     setEditandoId(null)
     setTextoEdicion('')
+  }
+
+  const guardarEdicion = async (id) => {
+    if (textoEdicion.trim() === '') {
+      setError('La descripción no puede estar vacía.')
+      return
+    }
+
+    try {
+      setError(null)
+
+      const actualizado = await ServiciosApi.update(id, {
+        descripcion: textoEdicion.trim()
+      })
+
+      if (actualizado === null) {
+        setError('No se pudo actualizar la descripción.')
+        return
+      }
+
+      setEditandoId(null)
+      setTextoEdicion('')
+
+      await cargarServicios()
+    } catch (error) {
+      console.error(error)
+      setError('No se pudo actualizar la descripción.')
+    }
+  }
+
+  if (loading) {
+    return (
+      <section className="manage-services">
+        <p>Cargando servicios...</p>
+      </section>
+    )
   }
 
   return (
@@ -40,51 +101,81 @@ const ManageServices = () => {
         <p>Administra los servicios disponibles para los estudiantes.</p>
       </div>
 
-      <div className="services-grid">
-        {servicios.map((servicio) => (
-          <article className="service-card" key={servicio.id}>
-            <div className="service-card-top">
-              <h3>{servicio.nombre}</h3>
-              <span className={servicio.activo ? 'service-estado activo' : 'service-estado inactivo'}>
-                {servicio.activo ? 'Activo' : 'Inactivo'}
-              </span>
-            </div>
+      {error && <p>{error}</p>}
 
-            {editandoId === servicio.id ? (
-              <textarea
-                className="service-textarea"
-                value={textoEdicion}
-                onChange={(e) => setTextoEdicion(e.target.value)}
-              />
-            ) : (
-              <p className="service-descripcion">{servicio.descripcion}</p>
-            )}
+      {servicios.length === 0 ? (
+        <p>No hay servicios registrados.</p>
+      ) : (
+        <div className="services-grid">
+          {servicios.map((servicio) => (
+            <article className="service-card" key={servicio.id}>
+              <div className="service-card-top">
+                <h3>{servicio.nombre}</h3>
 
-            <p className="service-reservas">
-              Reservas asociadas: <strong>{servicio.reservas}</strong>
-            </p>
-
-            <div className="service-acciones">
-              <button
-                className={servicio.activo ? 'btn-desactivar' : 'btn-activar'}
-                onClick={() => alternarActivo(servicio.id)}
-              >
-                {servicio.activo ? 'Desactivar' : 'Activar'}
-              </button>
+                <span
+                  className={
+                    servicio.estado
+                      ? 'service-estado activo'
+                      : 'service-estado inactivo'
+                  }
+                >
+                  {servicio.estado ? 'Activo' : 'Inactivo'}
+                </span>
+              </div>
 
               {editandoId === servicio.id ? (
-                <button className="btn-guardar" onClick={() => guardarEdicion(servicio.id)}>
-                  Guardar
-                </button>
+                <textarea
+                  className="service-textarea"
+                  value={textoEdicion}
+                  onChange={(event) => setTextoEdicion(event.target.value)}
+                />
               ) : (
-                <button className="btn-editar" onClick={() => empezarEdicion(servicio)}>
-                  Editar descripción
-                </button>
+                <p className="service-descripcion">
+                  {servicio.descripcion}
+                </p>
               )}
-            </div>
-          </article>
-        ))}
-      </div>
+
+              <div className="service-acciones">
+                <button
+                  className={
+                    servicio.estado
+                      ? 'btn-desactivar'
+                      : 'btn-activar'
+                  }
+                  onClick={() => alternarEstado(servicio)}
+                >
+                  {servicio.estado ? 'Desactivar' : 'Activar'}
+                </button>
+
+                {editandoId === servicio.id ? (
+                  <>
+                    <button
+                      className="btn-guardar"
+                      onClick={() => guardarEdicion(servicio.id)}
+                    >
+                      Guardar
+                    </button>
+
+                    <button
+                      className="btn-editar"
+                      onClick={cancelarEdicion}
+                    >
+                      Cancelar
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    className="btn-editar"
+                    onClick={() => empezarEdicion(servicio)}
+                  >
+                    Editar descripción
+                  </button>
+                )}
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
     </section>
   )
 }
