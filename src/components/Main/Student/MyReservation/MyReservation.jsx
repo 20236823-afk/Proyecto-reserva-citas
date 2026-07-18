@@ -5,10 +5,7 @@ const MyReservation = ({ reservas, cancelarReserva }) => {
   const [filtroEstado, setFiltroEstado] = useState('Todas')
   const [reservaSeleccionada, setReservaSeleccionada] = useState(null)
 
-  const reservasFiltradas =
-    filtroEstado === 'Todas'
-      ? reservas
-      : reservas.filter((reserva) => reserva.estado === filtroEstado)
+  const reservasFiltradas = filtroEstado === 'Todas' ? reservas : reservas.filter((reserva) => reserva.estado === filtroEstado)
 
   const verDetalleReserva = (reserva) => {
     setReservaSeleccionada(reserva)
