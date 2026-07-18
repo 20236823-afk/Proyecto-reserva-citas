@@ -18,44 +18,61 @@ const GeneralInfo = ({
 
   useEffect(() => {
     const cargarDatos = async () => {
-      setCargando(true)
-      setError('')
+      try {
+        setCargando(true)
+        setError('')
 
-      const localesObtenidos = await LocalesApi.findAll()
-      const recursosObtenidos = await RecursosApi.findAll()
+        const [localesObtenidos, recursosObtenidos] =
+          await Promise.all([
+            LocalesApi.findAll(),
+            RecursosApi.findAll()
+          ])
 
-      if (
-        localesObtenidos.length === 0 ||
-        recursosObtenidos.length === 0
-      ) {
-        setError('No se pudieron cargar los locales o recursos.')
+        setLocales(localesObtenidos)
+        setRecursos(recursosObtenidos)
+
+        if (
+          localesObtenidos.length === 0 ||
+          recursosObtenidos.length === 0
+        ) {
+          setError(
+            'No se pudieron cargar los locales o recursos.'
+          )
+        }
+      } catch (error) {
+        console.error(error)
+        setError(
+          'Ocurrió un error al cargar los locales y recursos.'
+        )
+      } finally {
+        setCargando(false)
       }
-
-      setLocales(localesObtenidos)
-      setRecursos(recursosObtenidos)
-      setCargando(false)
     }
 
     cargarDatos()
   }, [])
 
   const servicioId = Number(
-    servicioSeleccionado?.id || datosReserva.servicioId
+    servicioSeleccionado?.id ||
+    datosReserva.servicioId
   )
 
-  const localIdSeleccionado = datosReserva.localId
-    ? Number(datosReserva.localId)
-    : null
+  const localIdSeleccionado =
+    datosReserva.localId !== null &&
+    datosReserva.localId !== undefined
+      ? Number(datosReserva.localId)
+      : null
 
-  const recursoIdSeleccionado = datosReserva.recursoId
-    ? Number(datosReserva.recursoId)
-    : null
+  const recursoIdSeleccionado =
+    datosReserva.recursoId !== null &&
+    datosReserva.recursoId !== undefined
+      ? Number(datosReserva.recursoId)
+      : null
 
   const recursosFiltrados = recursos.filter((recurso) => {
     return (
       Number(recurso.servicioId) === servicioId &&
-      Number(recurso.localId) === localIdSeleccionado &&
-      recurso.estado === 'Disponible'
+      Number(recurso.localId) === localIdSeleccionado
     )
   })
 
@@ -80,17 +97,48 @@ const GeneralInfo = ({
   const manejarCambioLocal = (event) => {
     const valor = event.target.value
 
+    if (valor === '') {
+      actualizarDatosReserva({
+        localId: null,
+        localNombre: '',
+        recursoId: null,
+        recursoNombre: ''
+      })
+
+      return
+    }
+
+    const localSeleccionado = locales.find(
+      (local) => Number(local.id) === Number(valor)
+    )
+
     actualizarDatosReserva({
-      localId: valor === '' ? null : Number(valor),
-      recursoId: null
+      localId: Number(valor),
+      localNombre: localSeleccionado?.nombre || '',
+      recursoId: null,
+      recursoNombre: ''
     })
   }
 
   const manejarCambioRecurso = (event) => {
     const valor = event.target.value
 
+    if (valor === '') {
+      actualizarDatosReserva({
+        recursoId: null,
+        recursoNombre: ''
+      })
+
+      return
+    }
+
+    const recursoSeleccionado = recursos.find(
+      (recurso) => Number(recurso.id) === Number(valor)
+    )
+
     actualizarDatosReserva({
-      recursoId: valor === '' ? null : Number(valor)
+      recursoId: Number(valor),
+      recursoNombre: recursoSeleccionado?.nombre || ''
     })
   }
 
@@ -108,7 +156,10 @@ const GeneralInfo = ({
       <div className="general-card">
         <h2>Datos generales</h2>
 
-        <form className="general-form">
+        <form
+          className="general-form"
+          onSubmit={(event) => event.preventDefault()}
+        >
           <div className="form-row">
             <label>*Ingresar Nombre</label>
 
@@ -138,9 +189,17 @@ const GeneralInfo = ({
               value={datosReserva.campus || ''}
               onChange={manejarCambioCampus}
             >
-              <option value="">Seleccione un campus</option>
-              <option value="Mayorazgo">Mayorazgo</option>
-              <option value="Monterrico">Monterrico</option>
+              <option value="">
+                Seleccione un campus
+              </option>
+
+              <option value="Mayorazgo">
+                Mayorazgo
+              </option>
+
+              <option value="Monterrico">
+                Monterrico
+              </option>
             </select>
           </div>
 
@@ -159,7 +218,10 @@ const GeneralInfo = ({
               </option>
 
               {locales.map((local) => (
-                <option key={local.id} value={local.id}>
+                <option
+                  key={local.id}
+                  value={local.id}
+                >
                   {local.nombre}
                 </option>
               ))}
@@ -172,7 +234,10 @@ const GeneralInfo = ({
             <select
               value={recursoIdSeleccionado || ''}
               onChange={manejarCambioRecurso}
-              disabled={cargando || localIdSeleccionado === null}
+              disabled={
+                cargando ||
+                localIdSeleccionado === null
+              }
             >
               <option value="">
                 {localIdSeleccionado === null
@@ -181,7 +246,10 @@ const GeneralInfo = ({
               </option>
 
               {recursosFiltrados.map((recurso) => (
-                <option key={recurso.id} value={recurso.id}>
+                <option
+                  key={recurso.id}
+                  value={recurso.id}
+                >
                   {recurso.nombre}
                 </option>
               ))}

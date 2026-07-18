@@ -1,7 +1,83 @@
 import ReservationSteps from '../reservationSteps/reservationSteps'
 import './ReservationSummary.css'
 
-const ReservationSummary = ({ volverPaso, confirmarReserva, servicioSeleccionado }) => {
+const ReservationSummary = ({
+  volverPaso,
+  confirmarReserva,
+  servicioSeleccionado,
+  datosReserva,
+  confirmando
+}) => {
+  const formatearFecha = (fecha) => {
+    if (!fecha) {
+      return 'No seleccionada'
+    }
+
+    const [anio, mes, dia] = fecha.split('-')
+
+    if (!anio || !mes || !dia) {
+      return fecha
+    }
+
+    return `${dia}/${mes}/${anio}`
+  }
+
+  const formatearHora = (hora) => {
+    if (!hora) {
+      return 'No seleccionada'
+    }
+
+    return hora.substring(0, 5)
+  }
+
+  const calcularHoraFin = (horaInicio, duracion) => {
+    if (!horaInicio || !duracion) {
+      return ''
+    }
+
+    const [horas, minutos] = horaInicio
+      .split(':')
+      .map(Number)
+
+    const fechaTemporal = new Date()
+    fechaTemporal.setHours(horas)
+    fechaTemporal.setMinutes(minutos + Number(duracion))
+    fechaTemporal.setSeconds(0)
+
+    const horaFin = String(
+      fechaTemporal.getHours()
+    ).padStart(2, '0')
+
+    const minutoFin = String(
+      fechaTemporal.getMinutes()
+    ).padStart(2, '0')
+
+    return `${horaFin}:${minutoFin}`
+  }
+
+  const participantes =
+    datosReserva?.participantes || []
+
+  const nombreServicio =
+    servicioSeleccionado?.nombre ||
+    datosReserva?.servicioNombre ||
+    'No seleccionado'
+
+  const nombreLocal =
+    datosReserva?.localNombre ||
+    datosReserva?.local?.nombre ||
+    'No seleccionado'
+
+  const nombreRecurso =
+    datosReserva?.recursoNombre ||
+    datosReserva?.recurso?.nombre ||
+    'No seleccionado'
+
+  const horaFin = calcularHoraFin(
+    datosReserva?.horaInicio,
+    datosReserva?.duracion
+  )
+
   return (
     <section className="summary-page">
       <ReservationSteps pasoActual={3} />
@@ -18,34 +94,88 @@ const ReservationSummary = ({ volverPaso, confirmarReserva, servicioSeleccionado
 
           <div className="summary-row">
             <span>Campus:</span>
-            <strong>Mayorazgo</strong>
+
+            <strong>
+              {datosReserva?.campus || 'No seleccionado'}
+            </strong>
+          </div>
+
+          <div className="summary-row">
+            <span>Servicio:</span>
+
+            <strong>{nombreServicio}</strong>
           </div>
 
           <div className="summary-row">
             <span>Ubicación:</span>
-            <strong>Centro Deportivo Mayorazgo</strong>
+
+            <strong>{nombreLocal}</strong>
           </div>
 
           <div className="summary-row">
             <span>Recurso:</span>
+
+            <strong>{nombreRecurso}</strong>
+          </div>
+
+          <div className="summary-row">
+            <span>Fecha:</span>
+
             <strong>
-              {servicioSeleccionado ? servicioSeleccionado.nombre : 'Servicio no seleccionado'}
+              {formatearFecha(datosReserva?.fecha)}
             </strong>
           </div>
 
           <div className="summary-row">
             <span>Horario:</span>
-            <strong>Jue 04/06 - 10:00</strong>
+
+            <strong>
+              {datosReserva?.horaInicio
+                ? `${formatearHora(datosReserva.horaInicio)}${
+                    horaFin ? ` - ${horaFin}` : ''
+                  }`
+                : 'No seleccionado'}
+            </strong>
+          </div>
+
+          <div className="summary-row">
+            <span>Duración:</span>
+
+            <strong>
+              {datosReserva?.duracion
+                ? `${datosReserva.duracion} minutos`
+                : 'No seleccionada'}
+            </strong>
+          </div>
+
+          <div className="summary-row">
+            <span>Estado inicial:</span>
+
+            <strong>Pendiente</strong>
           </div>
         </div>
 
         <div className="summary-section">
           <h3>Participantes</h3>
 
-          <div className="participant-summary">
-            <span>20236823</span>
-            <strong>Antonio Sifuentes Linares</strong>
-          </div>
+          {participantes.length === 0 ? (
+            <p>No se registraron participantes.</p>
+          ) : (
+            participantes.map((participante, index) => (
+              <div
+                className="participant-summary"
+                key={`${participante.codigo}-${index}`}
+              >
+                <span>
+                  {participante.codigo || 'Sin código'}
+                </span>
+
+                <strong>
+                  {participante.nombre}
+                </strong>
+              </div>
+            ))
+          )}
         </div>
 
         <div className="summary-buttons">
@@ -53,6 +183,7 @@ const ReservationSummary = ({ volverPaso, confirmarReserva, servicioSeleccionado
             type="button"
             className="summary-back-button"
             onClick={volverPaso}
+            disabled={confirmando}
           >
             Anterior
           </button>
@@ -61,8 +192,11 @@ const ReservationSummary = ({ volverPaso, confirmarReserva, servicioSeleccionado
             type="button"
             className="summary-confirm-button"
             onClick={confirmarReserva}
+            disabled={confirmando}
           >
-            Confirmar reserva
+            {confirmando
+              ? 'Confirmando...'
+              : 'Confirmar reserva'}
           </button>
         </div>
       </div>

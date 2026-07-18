@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import Login from './components/Login/Login'                    // allison
+import Login from './components/Login/Login'
 import Header from './components/Header/Header'
 import SideBar from './components/SideBar/SideBar'
 import AdminSideBar from './components/SideBar/AdminSideBar'
@@ -12,14 +12,16 @@ import ManageSchedules from './components/Main/Admin/ManageSchedules/ManageSched
 import './App.css'
 
 const App = () => {
-  const [usuario, setUsuario] = useState(null)   // null = nadie ha iniciado sesión
+  const [usuario, setUsuario] = useState(null)
   const [currentSection, setCurrentSection] = useState('nueva-reserva')
 
-  // login correcto, seccion inicial
   const manejarLogin = (usuarioIngresado) => {
     setUsuario(usuarioIngresado)
+
     setCurrentSection(
-      usuarioIngresado.rol === 'admin' ? 'admin-dashboard' : 'nueva-reserva'
+      usuarioIngresado.rol === 'admin'
+        ? 'admin-dashboard'
+        : 'nueva-reserva'
     )
   }
 
@@ -28,7 +30,6 @@ const App = () => {
     setCurrentSection('nueva-reserva')
   }
 
-  // login
   if (!usuario) {
     return <Login onLogin={manejarLogin} />
   }
@@ -37,7 +38,11 @@ const App = () => {
 
   return (
     <div className="app">
-      <Header usuario={usuario} cerrarSesion={cerrarSesion} />
+      <Header
+        usuario={usuario}
+        cerrarSesion={cerrarSesion}
+      />
+
       <div className="app-body">
         {esAdmin ? (
           <>
@@ -45,13 +50,27 @@ const App = () => {
               currentSection={currentSection}
               setCurrentSection={setCurrentSection}
             />
+
             <main className="main">
-              {currentSection === 'admin-dashboard' && <AdminDashboard />}
-              {currentSection === 'admin-reservas' && <ManageReservations />}
-              {currentSection === 'admin-servicios' && <ManageServices />}
-              {currentSection === 'admin-noticias' && <ManageNews />}
-              {currentSection === 'admin-horarios' && <ManageSchedules />}
-              {/* mas secciones */}
+              {currentSection === 'admin-dashboard' && (
+                <AdminDashboard />
+              )}
+
+              {currentSection === 'admin-reservas' && (
+                <ManageReservations />
+              )}
+
+              {currentSection === 'admin-servicios' && (
+                <ManageServices />
+              )}
+
+              {currentSection === 'admin-noticias' && (
+                <ManageNews />
+              )}
+
+              {currentSection === 'admin-horarios' && (
+                <ManageSchedules />
+              )}
             </main>
           </>
         ) : (
@@ -60,9 +79,11 @@ const App = () => {
               currentSection={currentSection}
               setCurrentSection={setCurrentSection}
             />
+
             <Main
               currentSection={currentSection}
               setCurrentSection={setCurrentSection}
+              usuario={usuario}
             />
           </>
         )}

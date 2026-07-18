@@ -150,6 +150,7 @@ const ScheduleSelector = ({
       horarioId: Number(horarioSeleccionado.id),
       fecha: horarioSeleccionado.fecha,
       horaInicio: horarioSeleccionado.horaInicio,
+      horaFin: horarioSeleccionado.horaFin,
       duracion
     })
 
