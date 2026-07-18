@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const URI = 'http://localhost:3005'
+const URI = import.meta.env.VITE_API_URL
 
 const get = async (endpoint) => {
     const url = URI.concat(endpoint)

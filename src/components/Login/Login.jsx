@@ -3,7 +3,7 @@ import logo from '../../assets/logo.svg'
 import './Login.css'
 
 // url del backend, cambiar cuando este desplegado
-const API_URL = 'http://localhost:3005/api'
+const API_URL = `${import.meta.env.VITE_API_URL}/api`
 
 const Login = ({ onLogin }) => {
   const [correo, setCorreo] = useState('')

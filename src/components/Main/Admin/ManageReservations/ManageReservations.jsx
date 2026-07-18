@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import './ManageReservations.css'
 
-const API_URL = 'http://localhost:3005/api'
+const API_URL = `${import.meta.env.VITE_API_URL}/api`
 
 const filtros = ['Todas', 'Pendiente', 'Confirmado', 'Cancelado']
 
