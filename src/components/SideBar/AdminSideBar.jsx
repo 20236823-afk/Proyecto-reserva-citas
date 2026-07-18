@@ -1,4 +1,4 @@
-import iconoDashboard from '../../assets/icono_reserva_matricula.png'
+import iconoDashboard from '../../assets/Icono_reserva_matricula.png'
 import iconoReservas from '../../assets/icono-mis-reservas.png'
 import iconoServicios from '../../assets/Icono_reserva_matricula.png'
 import iconoNoticias from '../../assets/noticias_icono.png'

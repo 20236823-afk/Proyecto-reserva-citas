@@ -1,4 +1,4 @@
-import iconoNuevaReserva from '../../assets/icono_reserva_matricula.png'
+import iconoNuevaReserva from '../../assets/Icono_reserva_matricula.png'
 import iconoMisReservas from '../../assets/icono-mis-reservas.png'
 import iconoNoticias from '../../assets/noticias_icono.png'
 import './SideBar.css'
