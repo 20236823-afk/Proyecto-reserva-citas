@@ -1,0 +1,85 @@
+.schedule-page{
+    width: 100%;
+    padding: 30px 45px;
+    background-color: #f5f6f8;
+    min-height: calc(100vh - 70px);
+    box-sizing: border-box;
+}
+
+.schedule-header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.schedule-header h2{
+    color: #ff5a1f;
+}
+
+.schedule-header button{
+    border: none;
+    padding: 10px 22px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.select-button{
+    background-color: #2ecc71;
+    color: white;
+}
+
+.week-title{
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.schedule-table{
+    background-color: white;
+    border-radius: 14px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.12);
+    overflow: hidden;
+}
+
+.schedule-row{
+    display: grid;
+    grid-template-columns: 110px repeat(6, 1fr);
+    min-height: 42px;
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.schedule-days{
+    background-color: #eeeeee;
+    font-weight: bold;
+}
+
+.hour-cell,
+.day-cell{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid #e5e5e5;
+}
+
+.slot{
+    width: 28px;
+    height: 28px;
+    border: 1px solid #aaa;
+    border-radius: 6px;
+    background-color: #dddddd;
+    cursor: pointer;
+}
+
+.slot.selected{
+    background-color: #2ecc71;
+    border-color: #1e9d55;
+}
+
+.selected-text{
+    margin-top: 20px;
+    text-align: center;
+    font-weight: bold;
+    color: #2ecc71;
+}

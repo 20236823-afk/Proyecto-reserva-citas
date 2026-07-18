@@ -1,0 +1,109 @@
+.manage-schedules {
+  padding: 24px;
+}
+
+.manage-header {
+  margin-bottom: 20px;
+}
+
+.manage-header h2 {
+  margin: 0 0 6px;
+  color: #2d2d2d;
+  font-size: 24px;
+}
+
+.manage-header p {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.schedules-filtros {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.schedules-filtro {
+  background: #ffffff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  color: #2d2d2d;
+}
+
+.schedules-filtro:hover { background: #f0f0f0; }
+
+.schedules-filtro.active {
+  background: #ff671f;
+  border-color: #ff671f;
+  color: #ffffff;
+}
+
+.schedules-tabla-wrapper {
+  overflow-x: auto;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+}
+
+.schedules-tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  min-width: 800px;
+}
+
+.schedules-tabla th {
+  text-align: left;
+  padding: 12px 14px;
+  background: #f5f5f5;
+  border-bottom: 2px solid #e0e0e0;
+  color: #555;
+  font-size: 13px;
+}
+
+.schedules-tabla td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #eee;
+  color: #2d2d2d;
+}
+
+.schedules-vacio {
+  text-align: center;
+  color: #888;
+  padding: 24px;
+}
+
+.horario-estado {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+
+.estado-disponible { background: #e6f4ec; color: #2e7d32; }
+.estado-ocupado { background: #fbf3dc; color: #b8860b; }
+.estado-bloqueado { background: #fbeae8; color: #c0392b; }
+
+.schedules-acciones {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.schedules-acciones button {
+  border: none;
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.btn-liberar { background: #2e7d32; color: #fff; }
+.btn-ocupar { background: #b8860b; color: #fff; }
+.btn-bloquear { background: #c0392b; color: #fff; }
