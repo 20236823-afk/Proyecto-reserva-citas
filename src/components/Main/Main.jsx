@@ -49,19 +49,54 @@ const reservasIniciales = [
   }
 ]
 
+const datosReservaIniciales = {
+  nombre: '',
+  codigo: '',
+  campus: '',
+  servicioId: null,
+  localId: null,
+  recursoId: null,
+  horarioId: null,
+  fecha: '',
+  horaInicio: '',
+  duracion: null
+}
+
 const Main = ({ currentSection, setCurrentSection }) => {
   const [paso, setPaso] = useState(1)
   const [reservas, setReservas] = useState(reservasIniciales)
   const [servicioSeleccionado, setServicioSeleccionado] = useState(null)
+  const [datosReserva, setDatosReserva] = useState(datosReservaIniciales)
 
   useEffect(() => {
     if (currentSection === 'nueva-reserva') {
       setPaso(1)
+      setServicioSeleccionado(null)
+      setDatosReserva(datosReservaIniciales)
     }
   }, [currentSection])
 
+  const actualizarDatosReserva = (nuevosDatos) => {
+    setDatosReserva((datosActuales) => ({
+      ...datosActuales,
+      ...nuevosDatos
+    }))
+  }
+
   const seleccionarServicio = (servicio) => {
     setServicioSeleccionado(servicio)
+
+    setDatosReserva((datosActuales) => ({
+      ...datosActuales,
+      servicioId: Number(servicio.id),
+      localId: null,
+      recursoId: null,
+      horarioId: null,
+      fecha: '',
+      horaInicio: '',
+      duracion: null
+    }))
+
     setPaso(2)
   }
 
@@ -69,14 +104,24 @@ const Main = ({ currentSection, setCurrentSection }) => {
     const nuevaReserva = {
       id: `0000${Math.floor(Math.random() * 900000 + 100000)}`,
       local: 'Centro Deportivo Mayorazgo',
-      recurso: servicioSeleccionado ? servicioSeleccionado.nombre : 'Servicio no seleccionado',
-      detalle: servicioSeleccionado ? servicioSeleccionado.nombre : 'Sin detalle',
-      fecha: '04/06/2026',
-      horario: '10:00 - 10:50',
+      recurso: servicioSeleccionado
+        ? servicioSeleccionado.nombre
+        : 'Servicio no seleccionado',
+      detalle: servicioSeleccionado
+        ? servicioSeleccionado.nombre
+        : 'Sin detalle',
+      fecha: datosReserva.fecha || 'Sin fecha',
+      horario: datosReserva.horaInicio || 'Sin horario',
       estado: 'Confirmado'
     }
 
-    setReservas([nuevaReserva, ...reservas])
+    setReservas((reservasActuales) => [
+      nuevaReserva,
+      ...reservasActuales
+    ])
+
+    setDatosReserva(datosReservaIniciales)
+    setServicioSeleccionado(null)
     setPaso(1)
     setCurrentSection('mis-reservas')
   }
@@ -110,6 +155,9 @@ const Main = ({ currentSection, setCurrentSection }) => {
             <GeneralInfo
               volverPaso={() => setPaso(1)}
               siguientePaso={() => setPaso(3)}
+              servicioSeleccionado={servicioSeleccionado}
+              datosReserva={datosReserva}
+              actualizarDatosReserva={actualizarDatosReserva}
             />
           )}
 
@@ -117,6 +165,9 @@ const Main = ({ currentSection, setCurrentSection }) => {
             <ScheduleSelector
               volverPaso={() => setPaso(2)}
               siguientePaso={() => setPaso(4)}
+              servicioSeleccionado={servicioSeleccionado}
+              datosReserva={datosReserva}
+              actualizarDatosReserva={actualizarDatosReserva}
             />
           )}
 
@@ -132,6 +183,7 @@ const Main = ({ currentSection, setCurrentSection }) => {
               volverPaso={() => setPaso(4)}
               confirmarReserva={agregarReserva}
               servicioSeleccionado={servicioSeleccionado}
+              datosReserva={datosReserva}
             />
           )}
         </>

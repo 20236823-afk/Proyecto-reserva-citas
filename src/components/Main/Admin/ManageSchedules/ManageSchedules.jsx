@@ -1,29 +1,108 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import HorariosApi from '../../../../api/horarios.js'
 import './ManageSchedules.css'
-
-const horariosIniciales = [
-  { id: 1, servicio: 'Ambientes deportivos', local: 'Centro Deportivo Mayorazgo', fecha: '10/06/2026', inicio: '07:00', fin: '07:50', estado: 'Disponible' },
-  { id: 2, servicio: 'Ambientes deportivos', local: 'Centro Deportivo Mayorazgo', fecha: '10/06/2026', inicio: '08:00', fin: '08:50', estado: 'Ocupado' },
-  { id: 3, servicio: 'Reserva de Laboratorios', local: 'Pabellón S', fecha: '11/06/2026', inicio: '10:00', fin: '10:50', estado: 'Disponible' },
-  { id: 4, servicio: 'Reserva de cubículos', local: 'Biblioteca Central', fecha: '11/06/2026', inicio: '12:00', fin: '13:00', estado: 'Bloqueado' },
-  { id: 5, servicio: 'Préstamo de equipos (SERCOM)', local: 'SERCOM', fecha: '12/06/2026', inicio: '09:00', fin: '09:50', estado: 'Disponible' },
-  { id: 6, servicio: 'Reserva de Laboratorios', local: 'Pabellón S', fecha: '12/06/2026', inicio: '15:00', fin: '15:50', estado: 'Ocupado' }
-]
 
 const filtros = ['Todos', 'Disponible', 'Ocupado', 'Bloqueado']
 
 const ManageSchedules = () => {
-  const [horarios, setHorarios] = useState(horariosIniciales)
+  const [horarios, setHorarios] = useState([])
   const [filtro, setFiltro] = useState('Todos')
+  const [cargando, setCargando] = useState(true)
+  const [error, setError] = useState('')
+  const [horarioActualizando, setHorarioActualizando] = useState(null)
 
-  // Cambia el estado de un horario (liberar, ocupar, bloquear)
-  const cambiarEstado = (id, nuevoEstado) => {
-    setHorarios(horarios.map((h) => (h.id === id ? { ...h, estado: nuevoEstado } : h)))
+  useEffect(() => {
+    cargarHorarios()
+  }, [])
+
+  const cargarHorarios = async () => {
+    setCargando(true)
+    setError('')
+
+    try {
+      const horariosObtenidos = await HorariosApi.findAll()
+      setHorarios(horariosObtenidos)
+    } catch (errorPeticion) {
+      console.error('Error al cargar horarios:', errorPeticion)
+      setError('No se pudieron cargar los horarios.')
+    } finally {
+      setCargando(false)
+    }
   }
 
-  const horariosFiltrados = filtro === 'Todos'
-    ? horarios
-    : horarios.filter((h) => h.estado === filtro)
+  const cambiarEstado = async (horario, nuevoEstado) => {
+    setHorarioActualizando(horario.id)
+    setError('')
+
+    try {
+      const horarioActualizado = {
+        fecha: horario.fecha,
+        horaInicio: horario.horaInicio,
+        horaFin: horario.horaFin,
+        estado: nuevoEstado,
+        servicioId: horario.servicioId,
+        localId: horario.localId
+      }
+
+      await HorariosApi.update(horario.id, horarioActualizado)
+
+      setHorarios((horariosActuales) =>
+        horariosActuales.map((horarioActual) =>
+          horarioActual.id === horario.id
+            ? {
+                ...horarioActual,
+                estado: nuevoEstado
+              }
+            : horarioActual
+        )
+      )
+    } catch (errorPeticion) {
+      console.error('Error al actualizar horario:', errorPeticion)
+      setError('No se pudo actualizar el estado del horario.')
+    } finally {
+      setHorarioActualizando(null)
+    }
+  }
+
+  const formatearFecha = (fecha) => {
+    if (!fecha) {
+      return '-'
+    }
+
+    const [anio, mes, dia] = fecha.split('-')
+    return `${dia}/${mes}/${anio}`
+  }
+
+  const formatearHora = (hora) => {
+    if (!hora) {
+      return '-'
+    }
+
+    return hora.slice(0, 5)
+  }
+
+  const obtenerNombreServicio = (horario) => {
+    return (
+      horario.Servicio?.nombre ||
+      horario.servicio?.nombre ||
+      horario.servicio ||
+      `Servicio ${horario.servicioId}`
+    )
+  }
+
+  const obtenerNombreLocal = (horario) => {
+    return (
+      horario.Local?.nombre ||
+      horario.local?.nombre ||
+      horario.local ||
+      `Local ${horario.localId}`
+    )
+  }
+
+  const horariosFiltrados =
+    filtro === 'Todos'
+      ? horarios
+      : horarios.filter((horario) => horario.estado === filtro)
 
   return (
     <section className="manage-schedules">
@@ -33,52 +112,129 @@ const ManageSchedules = () => {
       </div>
 
       <div className="schedules-filtros">
-        {filtros.map((f) => (
+        {filtros.map((filtroDisponible) => (
           <button
-            key={f}
-            className={filtro === f ? 'schedules-filtro active' : 'schedules-filtro'}
-            onClick={() => setFiltro(f)}
+            key={filtroDisponible}
+            type="button"
+            className={
+              filtro === filtroDisponible
+                ? 'schedules-filtro active'
+                : 'schedules-filtro'
+            }
+            onClick={() => setFiltro(filtroDisponible)}
           >
-            {f}
+            {filtroDisponible}
           </button>
         ))}
       </div>
+
+      {error && (
+        <p className="schedules-error">
+          {error}
+        </p>
+      )}
 
       <div className="schedules-tabla-wrapper">
         <table className="schedules-tabla">
           <thead>
             <tr>
-              <th>Servicio</th><th>Local</th><th>Fecha</th>
-              <th>Hora inicio</th><th>Hora fin</th><th>Estado</th><th>Acciones</th>
+              <th>Servicio</th>
+              <th>Local</th>
+              <th>Fecha</th>
+              <th>Hora inicio</th>
+              <th>Hora fin</th>
+              <th>Estado</th>
+              <th>Acciones</th>
             </tr>
           </thead>
+
           <tbody>
-            {horariosFiltrados.length === 0 ? (
-              <tr><td colSpan="7" className="schedules-vacio">No hay horarios en esta categoría.</td></tr>
+            {cargando ? (
+              <tr>
+                <td colSpan="7" className="schedules-vacio">
+                  Cargando horarios...
+                </td>
+              </tr>
+            ) : horariosFiltrados.length === 0 ? (
+              <tr>
+                <td colSpan="7" className="schedules-vacio">
+                  No hay horarios en esta categoría.
+                </td>
+              </tr>
             ) : (
-              horariosFiltrados.map((h) => (
-                <tr key={h.id}>
-                  <td>{h.servicio}</td>
-                  <td>{h.local}</td>
-                  <td>{h.fecha}</td>
-                  <td>{h.inicio}</td>
-                  <td>{h.fin}</td>
-                  <td>
-                    <span className={`horario-estado estado-${h.estado.toLowerCase()}`}>{h.estado}</span>
-                  </td>
-                  <td className="schedules-acciones">
-                    {h.estado !== 'Disponible' && (
-                      <button className="btn-liberar" onClick={() => cambiarEstado(h.id, 'Disponible')}>Liberar</button>
-                    )}
-                    {h.estado !== 'Ocupado' && (
-                      <button className="btn-ocupar" onClick={() => cambiarEstado(h.id, 'Ocupado')}>Marcar ocupado</button>
-                    )}
-                    {h.estado !== 'Bloqueado' && (
-                      <button className="btn-bloquear" onClick={() => cambiarEstado(h.id, 'Bloqueado')}>Bloquear</button>
-                    )}
-                  </td>
-                </tr>
-              ))
+              horariosFiltrados.map((horario) => {
+                const actualizando =
+                  horarioActualizando === horario.id
+
+                return (
+                  <tr key={horario.id}>
+                    <td>{obtenerNombreServicio(horario)}</td>
+
+                    <td>{obtenerNombreLocal(horario)}</td>
+
+                    <td>{formatearFecha(horario.fecha)}</td>
+
+                    <td>{formatearHora(horario.horaInicio)}</td>
+
+                    <td>{formatearHora(horario.horaFin)}</td>
+
+                    <td>
+                      <span
+                        className={`horario-estado estado-${horario.estado.toLowerCase()}`}
+                      >
+                        {horario.estado}
+                      </span>
+                    </td>
+
+                    <td className="schedules-acciones">
+                      {horario.estado !== 'Disponible' && (
+                        <button
+                          type="button"
+                          className="btn-liberar"
+                          disabled={actualizando}
+                          onClick={() =>
+                            cambiarEstado(horario, 'Disponible')
+                          }
+                        >
+                          Liberar
+                        </button>
+                      )}
+
+                      {horario.estado !== 'Ocupado' && (
+                        <button
+                          type="button"
+                          className="btn-ocupar"
+                          disabled={actualizando}
+                          onClick={() =>
+                            cambiarEstado(horario, 'Ocupado')
+                          }
+                        >
+                          Marcar ocupado
+                        </button>
+                      )}
+
+                      {horario.estado !== 'Bloqueado' && (
+                        <button
+                          type="button"
+                          className="btn-bloquear"
+                          disabled={actualizando}
+                          onClick={() =>
+                            cambiarEstado(horario, 'Bloqueado')
+                          }
+                        >
+                          Bloquear
+                        </button>
+                      )}
+
+                      {actualizando && (
+                        <span className="schedules-updating">
+                          Guardando...
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                )
+              })
             )}
           </tbody>
         </table>
