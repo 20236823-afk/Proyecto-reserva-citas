@@ -1,30 +1,71 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './ManageReservations.css'
 
-// Datos simulados de reservas de estudiantes.
-const reservasIniciales = [
-  { id: '0000309481', estudiante: 'Antonio Sifuentes', codigo: '20236823', servicio: 'Ambientes deportivos', local: 'Centro Deportivo Mayorazgo', fecha: '03/06/2026', horario: '07:00 - 07:50', estado: 'Pendiente' },
-  { id: '0000305573', estudiante: 'María Gonzales', codigo: '20231145', servicio: 'Reserva de cubículos', local: 'Biblioteca Central', fecha: '29/05/2026', horario: '10:00 - 10:50', estado: 'Confirmado' },
-  { id: '0000305293', estudiante: 'Luis Ramírez', codigo: '20239988', servicio: 'Reserva de Laboratorios', local: 'Pabellón S', fecha: '28/05/2026', horario: '15:00 - 15:50', estado: 'Confirmado' },
-  { id: '0000306210', estudiante: 'Carla Díaz', codigo: '20235567', servicio: 'Préstamo de equipos (SERCOM)', local: 'SERCOM', fecha: '05/06/2026', horario: '12:00 - 13:00', estado: 'Pendiente' },
-  { id: '0000306877', estudiante: 'Jorge Paredes', codigo: '20234321', servicio: 'Ambientes técnicos (SERCOM)', local: 'SERCOM', fecha: '06/06/2026', horario: '09:00 - 09:50', estado: 'Cancelado' }
-]
+const API_URL = 'http://localhost:3005/api'
 
 const filtros = ['Todas', 'Pendiente', 'Confirmado', 'Cancelado']
 
-const ManageReservations = () => {
-  const [reservas, setReservas] = useState(reservasIniciales)
-  const [filtro, setFiltro] = useState('Todas')
-  const [detalle, setDetalle] = useState(null) // reserva mostrada en el modal
+// arma "07:00 - 08:00" a partir de la hora de inicio y la duracion en minutos
+const formatearHorario = (horaInicio, duracionMin) => {
+  const [h, m] = horaInicio.split(':').map(Number)
+  const inicioMin = h * 60 + m
+  const finMin = inicioMin + duracionMin
+  const aTexto = (min) => {
+    const hh = String(Math.floor(min / 60)).padStart(2, '0')
+    const mm = String(min % 60).padStart(2, '0')
+    return `${hh}:${mm}`
+  }
+  return `${aTexto(inicioMin)} - ${aTexto(finMin)}`
+}
 
-  // Cambia el estado de una reserva (aprobar, rechazar, cancelar)
-  const cambiarEstado = (id, nuevoEstado) => {
-    setReservas(reservas.map((r) => (r.id === id ? { ...r, estado: nuevoEstado } : r)))
+const ManageReservations = () => {
+  const [reservas, setReservas] = useState([])
+  const [filtro, setFiltro] = useState('Todas')
+  const [detalle, setDetalle] = useState(null)
+  const [cargando, setCargando] = useState(true)
+
+  // trae las reservas del backend
+  const cargarReservas = () => {
+    setCargando(true)
+    fetch(`${API_URL}/reservas`)
+      .then((res) => res.json())
+      .then((data) => setReservas(data))
+      .catch((err) => console.error(err))
+      .finally(() => setCargando(false))
+  }
+
+  useEffect(() => {
+    cargarReservas()
+  }, [])
+
+  // aprobar, rechazar o cancelar: hace PUT al backend y despues recarga la lista
+  const cambiarEstado = async (id, nuevoEstado) => {
+    try {
+      await fetch(`${API_URL}/reservas/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ estado: nuevoEstado })
+      })
+      cargarReservas() // vuelve a pedir la lista actualizada
+    } catch (err) {
+      console.error(err)
+    }
   }
 
   const reservasFiltradas = filtro === 'Todas'
     ? reservas
     : reservas.filter((r) => r.estado === filtro)
+
+  if (cargando) {
+    return (
+      <section className="manage-reservations">
+        <div className="manage-header">
+          <h2>Gestión de reservas</h2>
+        </div>
+        <p>Cargando reservas...</p>
+      </section>
+    )
+  }
 
   return (
     <section className="manage-reservations">
@@ -60,12 +101,12 @@ const ManageReservations = () => {
               reservasFiltradas.map((r) => (
                 <tr key={r.id}>
                   <td>{r.id}</td>
-                  <td>{r.estudiante}</td>
-                  <td>{r.codigo}</td>
-                  <td>{r.servicio}</td>
-                  <td>{r.local}</td>
+                  <td>{r.Usuario?.nombre}</td>
+                  <td>{r.Usuario?.codigo}</td>
+                  <td>{r.Servicio?.nombre}</td>
+                  <td>{r.Local?.nombre ?? '—'}</td>
                   <td>{r.fecha}</td>
-                  <td>{r.horario}</td>
+                  <td>{formatearHorario(r.horaInicio, r.duracion)}</td>
                   <td>
                     <span className={`estado estado-${r.estado.toLowerCase()}`}>{r.estado}</span>
                   </td>
@@ -88,18 +129,17 @@ const ManageReservations = () => {
         </table>
       </div>
 
-      {/* Modal de detalle */}
       {detalle && (
         <div className="modal-overlay" onClick={() => setDetalle(null)}>
           <div className="modal-card" onClick={(e) => e.stopPropagation()}>
             <h3>Detalle de la reserva</h3>
             <p><span>ID Reserva:</span> {detalle.id}</p>
-            <p><span>Estudiante:</span> {detalle.estudiante}</p>
-            <p><span>Código:</span> {detalle.codigo}</p>
-            <p><span>Servicio:</span> {detalle.servicio}</p>
-            <p><span>Local:</span> {detalle.local}</p>
+            <p><span>Estudiante:</span> {detalle.Usuario?.nombre}</p>
+            <p><span>Código:</span> {detalle.Usuario?.codigo}</p>
+            <p><span>Servicio:</span> {detalle.Servicio?.nombre}</p>
+            <p><span>Local:</span> {detalle.Local?.nombre ?? '—'}</p>
             <p><span>Fecha:</span> {detalle.fecha}</p>
-            <p><span>Horario:</span> {detalle.horario}</p>
+            <p><span>Horario:</span> {formatearHorario(detalle.horaInicio, detalle.duracion)}</p>
             <p><span>Estado:</span> {detalle.estado}</p>
             <button className="modal-cerrar" onClick={() => setDetalle(null)}>Cerrar</button>
           </div>

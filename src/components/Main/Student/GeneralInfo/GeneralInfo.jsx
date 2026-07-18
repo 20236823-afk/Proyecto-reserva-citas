@@ -1,5 +1,4 @@
 import ReservationSteps from '../reservationSteps/reservationSteps'
-import lupaIcono from '../../../../assets/lupa_icono.png'
 import './GeneralInfo.css'
 
 const GeneralInfo = ({ volverPaso, siguientePaso }) => {
@@ -47,16 +46,15 @@ const GeneralInfo = ({ volverPaso, siguientePaso }) => {
             </select>
           </div>
 
-          <div className="form-row schedule-row">
+          <div className="form-row">
             <label>*Seleccionar horario</label>
 
             <button
               type="button"
-              className="schedule-icon-button"
+              className="schedule-open-button"
               onClick={siguientePaso}
-              aria-label="Seleccionar horario"
             >
-              <img src={lupaIcono} alt="" />
+              Seleccionar horario
             </button>
           </div>
         </form>
