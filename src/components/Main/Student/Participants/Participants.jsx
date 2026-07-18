@@ -2,6 +2,7 @@ import ReservationSteps from '../reservationSteps/reservationSteps'
 import './Participants.css'
 
 const Participants = ({ volverPaso, siguientePaso, datosReserva, actualizarDatosReserva }) => {
+  // Aseguramos que jale el arreglo temporal
   const listaParticipantes = datosReserva?.participantes?.length > 0 
     ? datosReserva.participantes 
     : [{ codigo: '', nombre: '' }]
@@ -47,6 +48,7 @@ const Participants = ({ volverPaso, siguientePaso, datosReserva, actualizarDatos
   }
 
   const manejarSiguiente = () => {
+    // Filtramos para enviar únicamente los participantes que sí tengan datos escritos
     const filtrados = listaParticipantes.filter(
       (p) => p.nombre.trim() !== '' || p.codigo.trim() !== ''
     )

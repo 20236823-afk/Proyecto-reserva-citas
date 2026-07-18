@@ -1,9 +1,48 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './MyReservation.css'
+import ReservasApi from '../../../../api/reservas.js'
 
-const MyReservation = ({ reservas, cancelarReserva, loadingReservas, errorReservas, procesandoReservaId }) => {
+const MyReservation = () => {
+  const [reservas, setReservas] = useState([])
+  const [loadingReservas, setLoadingReservas] = useState(true)
+  const [errorReservas, setErrorReservas] = useState(null)
+  const [procesandoReservaId, setProcesandoReservaId] = useState(null)
+  
   const [filtroEstado, setFiltroEstado] = useState('Todas')
   const [reservaSeleccionada, setReservaSeleccionada] = useState(null)
+
+  // Función para cargar las reservas desde la base de datos
+  const cargarReservas = async () => {
+    setLoadingReservas(true)
+    setErrorReservas(null)
+    const datos = await ReservasApi.findAll()
+    if (datos) {
+      setReservas(datos)
+    } else {
+      setErrorReservas('Error al cargar las reservas desde el servidor.')
+    }
+    setLoadingReservas(false)
+  }
+
+  // Hook useEffect para que cargue automáticamente al abrir la pantalla
+  useEffect(() => {
+    cargarReservas()
+  }, [])
+
+  // Función para cancelar la reserva (usa el update de la API)
+  const cancelarReserva = async (id) => {
+    setProcesandoReservaId(id)
+    // Cambiamos el estado de la reserva a 'Cancelado'
+    const resultado = await ReservasApi.update(id, { estado: 'Cancelado' })
+    
+    if (resultado) {
+      // Recargamos los datos para ver reflejado el cambio
+      await cargarReservas()
+    } else {
+      setErrorReservas('No se pudo cancelar la reserva.')
+    }
+    setProcesandoReservaId(null)
+  }
 
   const reservasFiltradas = filtroEstado === 'Todas' 
     ? reservas 
@@ -190,7 +229,7 @@ const MyReservation = ({ reservas, cancelarReserva, loadingReservas, errorReserv
                   {formatearHora(reserva.horaInicio)} - {calcularHoraFin(reserva.horaInicio, reserva.duracion)}
                 </td>
                 <td>
-                  <span className={`status-badge ${reserva.estado.toLowerCase()}`}>
+                  <span className={`status-badge ${reserva.estado ? reserva.estado.toLowerCase() : ''}`}>
                     {reserva.estado}
                   </span>
                 </td>
